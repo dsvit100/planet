@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#090C1F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>행성 수박게임 | 부천천문과학관</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,57 +339,6 @@
   .rank-btn:active{transform:scale(.96);}
 
 
-  /* ===== 터치스크린 화면 키보드 (Space War 2095와 동일 형식, 색상만 이 게임 톤에 맞춤) ===== */
-  .touch-kb{
-    position:fixed;left:0;right:0;bottom:0;z-index:200;
-    background:linear-gradient(180deg, var(--panel-navy), var(--deep-space) 60%);
-    border-top:2px solid var(--aurora);
-    box-shadow:0 -8px 30px rgba(0,0,0,.6), 0 -2px 20px rgba(79,216,196,.15);
-    padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));
-    transform:translateY(110%);
-    transition:transform .22s ease;
-  }
-  .touch-kb.show{transform:translateY(0);}
-  .touch-kb-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
-  .touch-kb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
-  .touch-kb-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:12px;color:var(--text-dim);letter-spacing:.05em;}
-  .touch-kb-done{
-    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;
-    background:var(--panel-navy-2);border:2px solid var(--leaf);
-    color:var(--leaf);border-radius:8px;padding:8px 14px;cursor:pointer;
-  }
-  .touch-kb-done:active{transform:scale(.96);}
-  .touch-kb-head-right{display:flex;align-items:center;gap:8px;}
-  .touch-kb-lang{
-    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;
-    background:var(--panel-navy-2);border:2px solid var(--starlight);
-    color:var(--starlight);border-radius:8px;padding:8px 12px;cursor:pointer;
-    min-width:56px;text-align:center;
-  }
-  .touch-kb-lang:active{transform:scale(.96);background:rgba(245,200,107,.2);}
-  .touch-kb-row{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;}
-  .touch-kb-key{
-    flex:1;min-width:0;height:46px;
-    font-family:'Gothic A1',sans-serif;font-weight:700;font-size:15px;
-    background:var(--panel-navy-2);
-    border:2px solid var(--aurora);color:var(--aurora);
-    border-radius:8px;cursor:pointer;user-select:none;touch-action:manipulation;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .touch-kb-key:active{background:rgba(79,216,196,.22);transform:scale(.95);}
-  .touch-kb-bottom{margin-top:2px;}
-  .touch-kb-space{flex:5;font-size:13px;letter-spacing:.1em;}
-  .touch-kb-wide{flex:2;font-size:13px;}
-  .touch-kb-back{border-color:var(--flare);color:var(--flare);}
-  .touch-kb-back:active{background:rgba(255,107,129,.22);}
-  .touch-kb-shift{border-color:var(--starlight);color:var(--starlight);}
-  .touch-kb-shift.on{background:rgba(245,200,107,.25);box-shadow:0 0 10px rgba(245,200,107,.5);}
-  .touch-kb-shift:active{background:rgba(245,200,107,.22);}
-  @media (max-width:640px){
-    .touch-kb-key{height:40px;font-size:14px;}
-    .touch-kb-lang{padding:7px 10px;font-size:12px;min-width:48px;}
-  }
-
   /* ===== 입력 / 순위 / 상품(1위 배송정보) ===== */
   input{-webkit-user-select:text;user-select:text;}
   .launch-btn:disabled,.rank-btn:disabled{opacity:.45;cursor:not-allowed;}
@@ -399,7 +352,6 @@
     display:none;max-width:440px;margin-top:12px;padding:12px 16px;border-radius:12px;
     border:1px solid var(--flare);background:rgba(255,107,129,.1);color:var(--flare);font-weight:700;font-size:14px;line-height:1.6;
   }
-  body.kb-open .screen{padding-bottom:340px;}
 
   .rank-card{width:100%;max-width:440px;background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);border-radius:16px;padding:16px 18px;margin-bottom:14px;text-align:left;}
   .rank-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:15px;text-align:center;margin-bottom:12px;}
@@ -460,6 +412,46 @@
   }
   /* 휴대폰 기본 키보드가 올라오면 입력칸이 가려지지 않도록 아래 여백 확보 (visualViewport 기반) */
   body.vk-open .screen{padding-bottom:calc(var(--vk,0px) + 24px);}
+
+  /* ===== 모바일·태블릿 최적화 (세로/가로 자동 대응) ===== */
+  #screen-game{touch-action:none;}
+  #dpad{
+    grid-template-columns:repeat(3,var(--pad,64px));
+    grid-template-rows:repeat(2,var(--pad,64px));
+    gap:clamp(6px,1.2vh,14px);
+    margin-top:clamp(8px,2vh,20px);
+  }
+  @media (orientation:portrait){
+    #screen-game{
+      --pad:clamp(50px,7.5vh,84px);
+      --board:min(94vw, 760px, calc(100vh - 2*var(--pad) - 190px));
+    }
+    @supports (height:100dvh){
+      #screen-game{
+        --pad:clamp(50px,7.5dvh,84px);
+        --board:min(94vw, 760px, calc(100dvh - 2*var(--pad) - 190px));
+      }
+    }
+  }
+  @media (orientation:landscape){
+    #screen-game{
+      --pad:clamp(44px,13vh,84px);
+      --board:min(calc(100vh - 24px), 62vw, 820px);
+    }
+    @supports (height:100dvh){
+      #screen-game{
+        --pad:clamp(44px,13dvh,84px);
+        --board:min(calc(100dvh - 24px), 62vw, 820px);
+      }
+    }
+  }
+  /* 태블릿: 글자·버튼을 조금 더 크게 */
+  @media (min-width:768px){
+    p.lead{font-size:18px;}
+    .rule-text{font-size:16px;}
+    .field-panel,.rank-card,.prize,#fact-card{max-width:520px;}
+    .pad-btn{font-size:34px;}
+  }
 </style>
 </head>
 <body>
@@ -476,21 +468,21 @@
           <div class="id-grid">
             <div>
               <label class="field-label" for="input-name">이름</label>
-              <input class="arcade-input" id="input-name" maxlength="10" placeholder="예) 김민준" autocomplete="off" data-kb data-kb-title="이름 입력">
+              <input class="arcade-input" id="input-name" maxlength="10" placeholder="예) 김민준" autocomplete="name" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
             </div>
             <div>
               <label class="field-label" for="input-phone">휴대폰 번호 뒷 4자리</label>
-              <input class="arcade-input" id="input-phone" type="tel" maxlength="4" inputmode="numeric" placeholder="예) 1234" autocomplete="off" data-kb data-kb-title="휴대폰 번호 뒷 4자리 입력">
+              <input class="arcade-input" id="input-phone" type="tel" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="예) 1234" autocomplete="off" enterkeyhint="go">
             </div>
           </div>
         </div>
         <button class="launch-btn" id="btn-to-howto" style="margin-top:10px;">시작하기</button>
+        <div class="notice-box" id="closedNotice">🏁 운영이 종료되었어요.<br>참여해 주셔서 감사합니다. 아래에서 최종 순위를 확인할 수 있어요.</div>
         <div class="notice-box" id="blockNotice">😊 이미 참여하셨습니다!<br>참여해 주셔서 감사합니다.</div>
         <button class="rank-btn" id="btn-to-ranking">🏆 내 순위 다시 확인하기</button>
         <p class="title-note" id="titleNote"></p>
         <div class="credit">
-          © 부천천문과학관. All rights reserved.<br>
-          Developed by 김민찬
+          © 부천천문과학관. All rights reserved.
         </div>
       </div>
 
@@ -499,7 +491,7 @@
         <div class="eyebrow">HOW TO PLAY</div>
         <h1 class="title" style="font-size:clamp(21px,4vw,28px);margin-bottom:20px;">이렇게 플레이하세요</h1>
         <div class="rules">
-          <div class="rule-row"><div class="rule-num">1</div><div class="rule-text">손가락으로 화면을 <b>상하좌우로 스와이프</b>하면 보드 위 모든 행성이 그 방향 끝까지 한꺼번에 밀려 이동해요. 화면 아래 방향 버튼으로도 조작할 수 있어요</div></div>
+          <div class="rule-row"><div class="rule-num">1</div><div class="rule-text">손가락으로 화면 아무 곳이나 <b>상하좌우로 스와이프</b>하면 보드 위 모든 행성이 그 방향 끝까지 한꺼번에 밀려 이동해요. 화면 아래 방향 버튼으로도 조작할 수 있어요</div></div>
           <div class="rule-row"><div class="rule-num">2</div><div class="rule-text">이동하는 도중 <b>같은 행성 두 개가 부딪히면 하나로 합쳐지면서</b> 다음 단계 행성으로 진화해요. 합쳐진 행성은 또 다른 같은 행성과 부딪히면 계속 진화할 수 있어요</div></div>
           <div class="rule-row"><div class="rule-num">3</div><div class="rule-text">진화 순서는 <b>태양에서 가까운 행성 순서</b> 그대로예요. 아래 순서대로 합쳐 나가면 돼요</div></div>
           <div class="rule-row"><div class="rule-num">4</div><div class="rule-text">움직일 때마다 보드 빈 칸에 새 행성(수성 또는 금성)이 하나씩 나타나요. 보드가 가득 차서 더 이상 합칠 곳이 없으면 게임이 끝나요</div></div>
@@ -577,30 +569,6 @@
   </div>
 </div>
 
-<!-- 터치스크린 전용 화면 키보드 (닉네임/관리자 비밀번호 입력용, Space War 2095와 동일 형식) -->
-<div class="touch-kb" id="touchKeyboard" aria-hidden="true">
-  <div class="touch-kb-inner">
-    <div class="touch-kb-head">
-      <span class="touch-kb-title" id="touchKbTitle">입력</span>
-      <div class="touch-kb-head-right">
-        <button type="button" class="touch-kb-lang" id="touchKbLang">한/영</button>
-        <button type="button" class="touch-kb-done" id="touchKbDone">완료 ▼</button>
-      </div>
-    </div>
-    <div class="touch-kb-row" data-row="1"></div>
-    <div class="touch-kb-row" data-row="2"></div>
-    <div class="touch-kb-row" data-row="3"></div>
-    <div class="touch-kb-row" data-row="4"></div>
-    <div class="touch-kb-row touch-kb-bottom">
-      <button type="button" class="touch-kb-key touch-kb-wide touch-kb-shift" id="touchKbShift" data-key="__shift">⇧ 쌍자음</button>
-      <button type="button" class="touch-kb-key touch-kb-space" data-key=" ">스페이스</button>
-      <button type="button" class="touch-kb-key touch-kb-wide" data-key="-">-</button>
-      <button type="button" class="touch-kb-key touch-kb-wide" data-key=",">,</button>
-      <button type="button" class="touch-kb-key touch-kb-wide touch-kb-back" data-key="__back">⌫ 지우기</button>
-    </div>
-  </div>
-</div>
-
 <script>
 /* ============== 화면 확대(핀치줌/더블탭줌) 완전 차단 ============== */
 document.addEventListener('contextmenu', e => e.preventDefault());
@@ -632,16 +600,17 @@ function planetOf(stage){ return PLANETS[stage-1]; }
 
 /* ============== 설정 (운영 전 꼭 확인) ============== */
 /* ⚠️ game6_Code.gs 를 Apps Script 웹앱으로 배포한 뒤, 그 URL(…/exec)을 아래에 붙여넣으세요 */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8wFXO9tNR5BzIa9_60B-aOEHbOIqkKCt1bgk2YPeESP0kMLm45Hlif8lvxbwpgOlN8Q/exec";
+const SCRIPT_URL = "여기에_배포_URL_붙여넣기";
 const PRIZE_NAME = '우주 관련 도서';      // 1위 상품명
 /* 테스트용: false = 중복 참여 제한 해제 (goldenbell과 동일).
    개인 휴대폰(QR)으로만 운영할 때만 true 로. 공용 터치스크린에서는 절대 true 금지 */
 const ENABLE_DEVICE_LIMIT = false;
+const REMEMBER_IDENTITY = true;          // true: 개인 폰·태블릿에서 이름/번호를 기억해 다음 접속 때 자동 입력 (기기를 여러 명이 돌려 쓰면 false)
 const ALLOW_RETRY = true;                // 같은 이름·번호로 다시하기 허용 (서버는 '최고 기록'만 반영)
-const USE_TOUCH_KEYBOARD = false;        // 개인 휴대폰·태블릿: false (기본 키보드 사용) / 공용 키오스크 터치스크린: true
 
 const $ = id => document.getElementById(id);
 let userName = '', userPhone = '';
+let serverClosed = false;
 let me = null, pollT = null, prizeKey = '', lookupMode = false, pendingPayload = null;
 
 /* ============== 화면 전환 ============== */
@@ -649,7 +618,7 @@ const screens = document.querySelectorAll('.screen');
 function showScreen(id){
   screens.forEach(s => s.classList.toggle('active', s.id === id));
   if(id !== 'screen-result') clearInterval(pollT);          // 결과 화면을 떠나면 자동 갱신 중지
-  if(window.closeTouchKeyboard) window.closeTouchKeyboard();
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
   const el = $(id); if(el) el.scrollTop = 0;
 }
 
@@ -685,7 +654,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 /* 휴대폰 기본 키보드: 키보드 높이만큼 여백을 주고, 입력 중인 칸을 화면 가운데로 */
 (function setupNativeKeyboardAssist(){
-  if(USE_TOUCH_KEYBOARD) return;
   const vv = window.visualViewport;
   if(vv){
     const upd = () => {
@@ -715,26 +683,51 @@ function readIdentity(){
 function goTitle(){
   if(pendingPayload && !confirm('아직 기록이 서버에 저장되지 않았어요.\n그래도 처음 화면으로 갈까요?')) return;
   pendingPayload = null; me = null; lookupMode = false; prizeKey = '';
-  $('input-name').value = ''; $('input-phone').value = '';
+  if(!REMEMBER_IDENTITY){ $('input-name').value = ''; $('input-phone').value = ''; }
   $('prizeCard').innerHTML = ''; $('prizeCard').style.display = 'none';
   showScreen('screen-title');
 }
 
 /* ---------------- 시작 / 이동 ---------------- */
 $('btn-to-howto').addEventListener('click', ()=>{
-  if(hasAlreadyParticipated()) return;
+  if(hasAlreadyParticipated() || serverClosed) return;
   const id = readIdentity();
   if(!id.name){ alert('이름을 입력해 주세요.'); return; }
   if(!/^\d{4}$/.test(id.phone)){ alert('휴대폰 번호 뒷 4자리를 숫자로 입력해 주세요.'); return; }
   if(!isConfigured()){ warnNotConfigured(); return; }
   playClick();
   userName = id.name; userPhone = id.phone;
+  if(REMEMBER_IDENTITY){ LS.set('pm_name', id.name); LS.set('pm_phone', id.phone); }
   buildChainPreview();
   showScreen('screen-howto');
 });
 $('back-from-howto').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
-$('btn-to-game').addEventListener('click', ()=>{ playClick(); startGame(); });
-$('btn-retry').addEventListener('click', ()=>{ playClick(); startGame(); });
+$('btn-to-game').addEventListener('click', ()=>{ playClick(); beginGame($('btn-to-game')); });
+$('btn-retry').addEventListener('click', ()=>{ playClick(); beginGame($('btn-retry')); });
+
+/* 게임 시작 전에 서버에서 '서명된 난수 시드'를 받아 온다 (서버가 같은 게임을 다시 돌려 기록을 검증하기 위함) */
+let starting = false;
+function beginGame(btn){
+  if(starting) return;
+  starting = true;
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = '게임 준비 중...';
+  POST({ action:'start', name:userName, phone:userPhone }).then(d => {
+    if(d && d.ok && d.token){ startGame(d.seed, d.token); return; }
+    if(d && d.closed){
+      serverClosed = true;
+      $('closedNotice').style.display = 'block'; $('btn-to-howto').disabled = true;
+      alert(d.error || '운영이 종료되었어요.');
+      showScreen('screen-title');
+      return;
+    }
+    alert((d && d.error) || '게임을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
+  }).catch(() => {
+    alert('서버에 연결하지 못했어요. 네트워크를 확인하고 다시 시도해 주세요.');
+  }).finally(() => {
+    starting = false; btn.disabled = false; btn.textContent = label;
+  });
+}
 $('btn-to-title').addEventListener('click', ()=>{ playClick(); goTitle(); });
 $('back-from-result').addEventListener('click', ()=>{ playClick(); goTitle(); });
 
@@ -797,7 +790,7 @@ function resetRankUI(msg){
 /* ---------------- 서버 통신 (Google Apps Script) ---------------- */
 function fetchJson(url, opts){
   const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), 20000);
+  const t = setTimeout(() => ctl.abort(), 30000);
   return fetch(url, Object.assign({ signal: ctl.signal }, opts)).then(r => r.json()).finally(() => clearTimeout(t));
 }
 const GET  = p => fetchJson(SCRIPT_URL + '?' + new URLSearchParams(Object.assign({ _t: Date.now() }, p)));
@@ -806,17 +799,31 @@ const POST = o => fetchJson(SCRIPT_URL, { method:'POST', headers:{ 'Content-Type
 /* 게임 종료 시 자동 제출. 네트워크 오류가 나도 pendingPayload 에 남겨 두었다가 [다시 시도]로 재전송 */
 function submitResult(){
   me = { name: userName, phone: userPhone }; lookupMode = false; prizeKey = '';
+  /* 서버는 token 의 시드로 게임을 처음부터 다시 돌려 단계·이동 횟수·시간을 직접 계산한다 (여기서 보내는 값은 이동 방향과 간격뿐) */
   pendingPayload = {
-    action:'submit', name:userName, phone:userPhone,
-    stage:bestStage, moves:reachMoves, timeMs:Math.round(reachMs),
-    totalMoves:moveCount
+    action:'submit', name:userName, phone:userPhone, token:gameToken,
+    moves:moveLog.join(''),
+    times:moveTimes.map((t,i) => t - (i ? moveTimes[i-1] : 0))
   };
+  LS.set('pm_pending', JSON.stringify(pendingPayload));   // 브라우저를 닫아도 기록이 남도록 보관
   sendPending();
 }
-function sendPending(){
-  if(!pendingPayload) return;
-  resetRankUI('기록을 저장하고 순위를 불러오는 중...');
-  POST(pendingPayload).then(d => { pendingPayload = null; renderStatus(d); }).catch(netErr);
+let sendSeq = 0;
+function sendPending(tries, seq){
+  tries = tries || 0;
+  if(tries === 0) seq = ++sendSeq;
+  if(!pendingPayload || seq !== sendSeq) return;      // 이미 처리됐거나 새 전송이 시작된 오래된 시도는 중단
+  resetRankUI(tries ? '서버가 바빠요. 다시 시도하는 중... (' + tries + '/3)' : '기록을 저장하고 순위를 불러오는 중...');
+  POST(pendingPayload).then(d => {
+    if(d && d.retry) throw new Error('server busy');
+    if(seq !== sendSeq) return;
+    pendingPayload = null; try { localStorage.removeItem('pm_pending'); } catch(e){}
+    renderStatus(d);
+  }).catch(e => {
+    if(seq !== sendSeq) return;
+    if(tries < 3){ setTimeout(() => sendPending(tries + 1, seq), 2500 * (tries + 1)); return; }
+    netErr(e);
+  });
 }
 function retryRank(){ if(pendingPayload) sendPending(); else { resetRankUI('순위를 불러오는 중...'); refresh(true); } }
 function showRankMsg(html){ $('rankContent').style.display = 'none'; $('rankLoading').style.display = 'block'; $('rankLoading').innerHTML = html; }
@@ -867,9 +874,9 @@ function renderStatus(d){
     w.appendChild(div);
   });
   $('rankNote').innerHTML = d.closed ? '🏁 운영이 종료되어 순위가 확정되었어요.' :
-    '※ 다른 참가자가 참여할 때마다 순위가 바뀔 수 있어요.<br>순위는 ①도달 천체 ②이동 횟수 ③걸린 시간 ④먼저 기록한 순서로 정해져요.<br>이 화면은 30초마다 자동 갱신돼요. (' + new Date().toLocaleTimeString('ko-KR') + ' 기준)';
+    '※ 다른 참가자가 참여할 때마다 순위가 바뀔 수 있어요.<br>순위는 ①도달 천체 ②이동 횟수 ③걸린 시간 ④먼저 기록한 순서로 정해져요.<br>이 화면은 1분마다 자동 갱신돼요. (' + new Date().toLocaleTimeString('ko-KR') + ' 기준)';
   renderPrize(d);
-  clearInterval(pollT); if(!d.closed) pollT = setInterval(() => refresh(false), 30000);
+  clearInterval(pollT); if(!d.closed) pollT = setInterval(() => { if(!document.hidden) refresh(false); }, 60000);
 }
 
 /* ---------------- 1위 상품 / 배송 정보 (goldenbell과 동일 절차) ---------------- */
@@ -892,12 +899,10 @@ function renderPrize(d){
 function showForm(){ $('reform').innerHTML = claimForm(); }
 
 function claimForm(){
-  const imText = USE_TOUCH_KEYBOARD ? ' inputmode="none"' : '';
-  const imTel  = USE_TOUCH_KEYBOARD ? ' inputmode="none"' : ' inputmode="numeric"';
   return `<div class="pf">
-  <label>받는 분 이름<input class="arcade-input" type="text" id="cName" maxlength="20" autocomplete="off" data-kb data-kb-title="받는 분 이름 입력"${imText}></label>
-  <label>휴대전화 번호(숫자만)<input class="arcade-input" type="tel" id="cTel" maxlength="13" placeholder="01012345678" autocomplete="off" data-kb data-kb-title="휴대전화 번호 입력"${imTel}></label>
-  <label>주소 (동·호수까지 자세히 적어 주세요)<input class="arcade-input" type="text" id="cAddr" maxlength="150" placeholder="예) 인천시 ○○구 ○○로 12, 101동 1203호" autocomplete="off" data-kb data-kb-title="주소 입력"${imText}></label>
+  <label>받는 분 이름<input class="arcade-input" type="text" id="cName" maxlength="20" autocomplete="name" enterkeyhint="next"></label>
+  <label>휴대전화 번호(숫자만)<input class="arcade-input" type="tel" id="cTel" maxlength="13" placeholder="01012345678" autocomplete="tel" inputmode="numeric" enterkeyhint="next"></label>
+  <label>주소 (동·호수까지 자세히 적어 주세요)<input class="arcade-input" type="text" id="cAddr" maxlength="150" autocomplete="street-address" enterkeyhint="done" placeholder="예) 인천시 ○○구 ○○로 12, 101동 1203호"></label>
   <details><summary>개인정보 수집·이용 안내 (펼쳐서 확인)</summary>
     · 수집 주체: 부천천문과학관<br>· 수집 항목: 받는 분 이름, 연락처, 주소(동·호수 포함)<br>· 이용 목적: 1위 상품 배송 및 당첨 안내<br>
     · 보유 기간: 상품 발송 후 30일 이내 파기<br>
@@ -916,7 +921,7 @@ function sendClaim(){
    .then(r => {
      if(!r.ok) return alert(r.error || '제출에 실패했어요.');
      alert('✅ 등록되었어요! 1위를 지키면 발송해 드려요.');
-     if(window.closeTouchKeyboard) window.closeTouchKeyboard();
+     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
      prizeKey = ''; refresh(true);
    })
    .catch(() => alert('네트워크 오류가 발생했어요. 다시 시도해 주세요.'));
@@ -946,261 +951,6 @@ function buildChainPreview(){
   });
 }
 
-/* ============== 터치스크린 화면 키보드 (Space War 2095와 동일 형식) ============== */
-// 물리 키보드가 없는 터치 전용 화면에서도 이름/번호/배송정보를 입력할 수 있도록,
-// 화면 하단에서 올라오는 자체 키보드를 제공합니다.
-(function setupTouchKeyboard(){
-  const KB_ROWS_EN = [
-    ['1','2','3','4','5','6','7','8','9','0'],
-    ['q','w','e','r','t','y','u','i','o','p'],
-    ['a','s','d','f','g','h','j','k','l'],
-    ['z','x','c','v','b','n','m'],
-  ];
-  // 두벌식(2-beolsik) 표준 자판 배열
-  const KB_ROWS_KO = [
-    ['1','2','3','4','5','6','7','8','9','0'],
-    ['ㅂ','ㅈ','ㄷ','ㄱ','ㅅ','ㅛ','ㅕ','ㅑ','ㅐ','ㅔ'],
-    ['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],
-    ['ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ'],
-  ];
-  // 시프트(쌍자음/이중모음) 매핑
-  const SHIFT_MAP = { 'ㅂ':'ㅃ', 'ㅈ':'ㅉ', 'ㄷ':'ㄸ', 'ㄱ':'ㄲ', 'ㅅ':'ㅆ', 'ㅐ':'ㅒ', 'ㅔ':'ㅖ' };
-
-  // ---- 한글 조합(초성/중성/종성 → 완성형 음절) 관련 테이블 ----
-  const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-  const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
-  const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-  const CHO_SET = new Set(CHO), JUNG_SET = new Set(JUNG);
-  const JUNG_COMBO = { 'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ' };
-  const JUNG_SPLIT = { 'ㅘ':'ㅗ','ㅙ':'ㅗ','ㅚ':'ㅗ','ㅝ':'ㅜ','ㅞ':'ㅜ','ㅟ':'ㅜ','ㅢ':'ㅡ' };
-  const JONG_COMBO = { 'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ' };
-  const JONG_SPLIT = { 'ㄳ':'ㄱ','ㄵ':'ㄴ','ㄶ':'ㄴ','ㄺ':'ㄹ','ㄻ':'ㄹ','ㄼ':'ㄹ','ㄽ':'ㄹ','ㄾ':'ㄹ','ㄿ':'ㄹ','ㅀ':'ㄹ','ㅄ':'ㅂ' };
-  const JONG_PARTS = {}; // 겹받침 → [앞 받침, 다음 음절 초성으로 넘어갈 자음]
-  for (const k in JONG_COMBO){ JONG_PARTS[JONG_COMBO[k]] = [k[0], k[1]]; }
-
-  function decompose(ch){
-    if (!ch) return null;
-    const c = ch.charCodeAt(0);
-    if (c < 0xAC00 || c > 0xD7A3) return null;
-    const idx = c - 0xAC00;
-    const jong = idx % 28;
-    const jung = ((idx - jong) / 28) % 21;
-    const cho = (((idx - jong) / 28) - jung) / 21;
-    return { cho, jung, jong };
-  }
-  function compose(cho, jung, jong){
-    return String.fromCharCode(0xAC00 + (cho*21 + jung)*28 + jong);
-  }
-
-  const kb = document.getElementById('touchKeyboard');
-  const rowEls = kb.querySelectorAll('.touch-kb-row[data-row]');
-  const langBtn = document.getElementById('touchKbLang');
-  const shiftBtn = document.getElementById('touchKbShift');
-
-  let mode = 'ko'; // 'ko' | 'en' — 기본값: 한글
-  let shiftOn = false;
-
-  function renderKeys(){
-    const rows = mode === 'ko' ? KB_ROWS_KO : KB_ROWS_EN;
-    rowEls.forEach((rowEl, i) => {
-      rowEl.innerHTML = '';
-      (rows[i] || []).forEach(k => {
-        let display = k;
-        if (mode === 'ko' && shiftOn && SHIFT_MAP[k]) display = SHIFT_MAP[k];
-        else if (mode === 'en' && shiftOn && /^[a-z]$/.test(k)) display = k.toUpperCase();
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'touch-kb-key';
-        btn.dataset.key = display;
-        btn.textContent = display;
-        rowEl.appendChild(btn);
-      });
-    });
-    shiftBtn.style.display = 'flex';
-    shiftBtn.textContent = mode === 'ko' ? '⇧ 쌍자음' : '⇧ 대문자';
-    shiftBtn.classList.toggle('on', shiftOn);
-    langBtn.textContent = mode === 'ko' ? '한글' : 'EN';
-  }
-  renderKeys();
-
-  let activeInput = null;
-  const kbTitleEl = document.getElementById('touchKbTitle');
-
-  function openTouchKeyboard(inputEl){
-    activeInput = inputEl;
-    if (kbTitleEl) kbTitleEl.textContent = inputEl.dataset.kbTitle || '입력';
-    kb.classList.add('show');
-    document.body.classList.add('kb-open');   // 키보드에 가려지지 않도록 화면 아래 여백 확보
-    setTimeout(() => { try { inputEl.scrollIntoView({ block:'center', behavior:'smooth' }); } catch(e){} }, 260);
-  }
-  window.closeTouchKeyboard = function(){
-    kb.classList.remove('show');
-    document.body.classList.remove('kb-open');
-    activeInput = null;
-  };
-
-  function atCaretEnd(el){
-    const start = el.selectionStart, end = el.selectionEnd;
-    return start === end && end === el.value.length;
-  }
-
-  function insertText(str){
-    if (!activeInput) return;
-    const el = activeInput;
-    const max = el.maxLength > 0 ? el.maxLength : Infinity;
-    const start = el.selectionStart ?? el.value.length;
-    const end = el.selectionEnd ?? el.value.length;
-    if (el.value.length - (end - start) + str.length > max) return;
-    el.value = el.value.slice(0, start) + str + el.value.slice(end);
-    const pos = start + str.length;
-    el.setSelectionRange(pos, pos);
-    el.dispatchEvent(new Event('input', { bubbles:true }));
-  }
-
-  // 마지막 한 글자를 newStr(1~2자)로 교체 (자모 조합용)
-  function replaceLastChar(newStr){
-    const el = activeInput;
-    const max = el.maxLength > 0 ? el.maxLength : Infinity;
-    const val = el.value;
-    const newVal = val.slice(0, -1) + newStr;
-    if (newVal.length > max) return;
-    el.value = newVal;
-    el.setSelectionRange(newVal.length, newVal.length);
-    el.dispatchEvent(new Event('input', { bubbles:true }));
-  }
-
-  // 한글 자모 입력 → 완성형 음절로 실시간 조합
-  function composeJamo(ch){
-    const el = activeInput;
-    if (!el) return;
-    if (!atCaretEnd(el)){
-      // 커서가 중간에 있으면 단순 삽입으로 대체 (조합 생략)
-      insertText(ch);
-      return;
-    }
-    const last = el.value.slice(-1);
-    if (CHO_SET.has(ch)){
-      const d = decompose(last);
-      if (d){
-        if (d.jong === 0){
-          const jongIdx = JONG.indexOf(ch);
-          if (jongIdx > 0){ replaceLastChar(compose(d.cho, d.jung, jongIdx)); return; }
-        } else {
-          const comboChar = JONG_COMBO[JONG[d.jong] + ch];
-          if (comboChar){ replaceLastChar(compose(d.cho, d.jung, JONG.indexOf(comboChar))); return; }
-        }
-      }
-      insertText(ch); // 새 음절의 초성으로 시작
-    } else if (JUNG_SET.has(ch)){
-      const d = decompose(last);
-      if (d){
-        if (d.jong === 0){
-          const comboChar = JUNG_COMBO[JUNG[d.jung] + ch];
-          if (comboChar){ replaceLastChar(compose(d.cho, JUNG.indexOf(comboChar), 0)); return; }
-          insertText(ch); // 결합 불가 → 홀로 낱자 삽입
-        } else {
-          // 종성을 다음 음절의 초성으로 넘김 (예: "간"+ㅏ→"가나", 겹받침 "값"+ㅣ→"갑시")
-          const jongChar = JONG[d.jong];
-          let firstJongIdx, movedChoChar;
-          if (JONG_PARTS[jongChar]){
-            firstJongIdx = JONG.indexOf(JONG_PARTS[jongChar][0]);
-            movedChoChar = JONG_PARTS[jongChar][1];
-          } else {
-            firstJongIdx = 0;
-            movedChoChar = jongChar;
-          }
-          const finalized = compose(d.cho, d.jung, firstJongIdx);
-          const movedCho = CHO.indexOf(movedChoChar);
-          if (movedCho >= 0){
-            replaceLastChar(finalized + compose(movedCho, JUNG.indexOf(ch), 0));
-          } else {
-            insertText(ch);
-          }
-        }
-      } else if (CHO_SET.has(last)){
-        // 낱자 초성 뒤에 모음 → 조합
-        replaceLastChar(compose(CHO.indexOf(last), JUNG.indexOf(ch), 0));
-      } else {
-        insertText(ch);
-      }
-    }
-  }
-
-  function backspace(){
-    if (!activeInput) return;
-    const el = activeInput;
-    const start = el.selectionStart ?? el.value.length;
-    const end = el.selectionEnd ?? el.value.length;
-    if (start !== end){
-      el.value = el.value.slice(0, start) + el.value.slice(end);
-      el.setSelectionRange(start, start);
-      el.dispatchEvent(new Event('input', { bubbles:true }));
-      return;
-    }
-    if (start === 0) return;
-    const value = el.value;
-    const last = value.slice(start-1, start);
-    const d = decompose(last);
-    if (d){
-      let newChar;
-      if (d.jong !== 0){
-        const splitTo = JONG_SPLIT[JONG[d.jong]];
-        newChar = compose(d.cho, d.jung, splitTo ? JONG.indexOf(splitTo) : 0);
-      } else {
-        const splitTo = JUNG_SPLIT[JUNG[d.jung]];
-        newChar = splitTo ? compose(d.cho, JUNG.indexOf(splitTo), 0) : CHO[d.cho];
-      }
-      el.value = value.slice(0, start-1) + newChar + value.slice(start);
-      el.setSelectionRange(start, start);
-    } else {
-      el.value = value.slice(0, start-1) + value.slice(start);
-      el.setSelectionRange(start-1, start-1);
-    }
-    el.dispatchEvent(new Event('input', { bubbles:true }));
-  }
-
-  kb.addEventListener('pointerdown', e => {
-    const btn = e.target.closest('.touch-kb-key, .touch-kb-lang');
-    if (!btn) return;
-    e.preventDefault(); // input 포커스가 풀리지 않도록
-    if (btn.id === 'touchKbLang'){
-      mode = mode === 'ko' ? 'en' : 'ko';
-      shiftOn = false;
-      renderKeys();
-    } else if (btn.dataset.key === '__back'){
-      backspace();
-    } else if (btn.dataset.key === '__shift'){
-      shiftOn = !shiftOn;
-      renderKeys();
-    } else if (mode === 'ko' && (CHO_SET.has(btn.dataset.key) || JUNG_SET.has(btn.dataset.key))){
-      composeJamo(btn.dataset.key);
-      if (shiftOn){ shiftOn = false; renderKeys(); }
-    } else {
-      insertText(btn.dataset.key);
-      if (mode === 'en' && shiftOn && /^[A-Z]$/.test(btn.dataset.key)){ shiftOn = false; renderKeys(); }
-    }
-    if (activeInput) activeInput.focus();
-  });
-  document.getElementById('touchKbDone').addEventListener('click', () => {
-    window.closeTouchKeyboard();
-  });
-
-  // 이름·번호 입력칸 + 1위 배송정보 입력칸(data-kb 속성)에 키보드 연결
-  if (USE_TOUCH_KEYBOARD){
-    ['input-name', 'input-phone'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.setAttribute('inputmode', 'none'); // 기본 OS 키보드 대신 커스텀 키보드 사용
-    });
-    document.addEventListener('focusin', e => {
-      if (e.target.matches && e.target.matches('input[data-kb]')) openTouchKeyboard(e.target);
-    });
-    document.addEventListener('pointerdown', e => {
-      const el = e.target.closest ? e.target.closest('input[data-kb]') : null;
-      if (el) openTouchKeyboard(el);
-    });
-  }
-})();
-
 /* ============== 게임 상태 ============== */
 const GRID = 4;
 let board = [];      // board[r][c] = stage(0=empty) or 0
@@ -1216,12 +966,28 @@ let inputLocked = false;
 let reachMoves = 0;
 let reachMs = 0;
 let gameStartAt = 0;
+/* 서버 검증용: 시드 기반 난수 + 이동 기록 */
+const MIN_MOVE_MS = 50;              // 서버(Code.gs)의 MIN_MOVE_MS 와 같아야 함. 이보다 빠른 연속 입력은 무시
+let rng = Math.random, gameToken = '';
+let moveLog = [], moveTimes = [];    // 보드가 실제로 바뀐 이동만 기록: 방향(L/R/U/D)과 시작 후 누적 시간(ms)
+const DIR_CH = { left:'L', right:'R', up:'U', down:'D' };
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+let hiddenAt = 0, hiddenTotal = 0;   // 전화·앱 전환 등으로 화면이 가려진 시간(기록에서 제외)
+function gameElapsed(){ const now = performance.now(); return now - gameStartAt - hiddenTotal - (hiddenAt ? now - hiddenAt : 0); }
 
 function emptyBoard(){
   return Array.from({length:GRID}, ()=>Array(GRID).fill(null));
 }
 
-function startGame(){
+function startGame(seed, token){
+  rng = mulberry32(seed); gameToken = token; moveLog = []; moveTimes = [];
   board = emptyBoard();
   score = 0; bestStage = 1; moveCount = 0; gameOver = false; sunReached = false; inputLocked = false;
   reachMoves = 0; reachMs = 0;
@@ -1233,6 +999,7 @@ function startGame(){
   spawnRandomTile();
   showScreen('screen-game');
   renderBoard(true);
+  hiddenAt = 0; hiddenTotal = 0;
   gameStartAt = performance.now();   // 시간 측정 시작 (보드가 보이는 시점)
 }
 
@@ -1240,14 +1007,14 @@ function randomEmptyCell(){
   const empties = [];
   for(let r=0;r<GRID;r++) for(let c=0;c<GRID;c++) if(!board[r][c]) empties.push([r,c]);
   if(empties.length === 0) return null;
-  return empties[Math.floor(Math.random()*empties.length)];
+  return empties[Math.floor(rng()*empties.length)];
 }
 
 function spawnRandomTile(){
   const cell = randomEmptyCell();
   if(!cell) return;
   const [r,c] = cell;
-  const stage = Math.random() < 0.85 ? 1 : 2;
+  const stage = rng() < 0.85 ? 1 : 2;
   const id = 'tile' + (++tileSeq);
   board[r][c] = { id, stage };
 }
@@ -1326,6 +1093,8 @@ function getLine(dir, i){
 
 function move(dir){
   if(inputLocked || gameOver) return;
+  const nowT = Math.round(gameElapsed()), lastT = moveTimes.length ? moveTimes[moveTimes.length-1] : 0;
+  if(nowT - lastT < MIN_MOVE_MS) return;       // 동시 터치 등으로 50ms 안에 겹친 입력은 무시 (서버 검증 기준과 동일)
   const prev = cloneBoard();
   const prevBest = bestStage;
   let merged = false;
@@ -1360,9 +1129,10 @@ function move(dir){
 
   if(!boardsEqual(prev, board)){
     moveCount++;
+    moveLog.push(DIR_CH[dir]); moveTimes.push(nowT);
     if(bestStage > prevBest){            // 새 최고 천체 도달 → 그 순간의 이동 횟수/시간(ms) 저장
       reachMoves = moveCount;
-      reachMs = performance.now() - gameStartAt;
+      reachMs = nowT;
     }
     document.getElementById('hud-moves').textContent = String(moveCount);
     document.getElementById('hud-best').textContent = planetOf(bestStage).name;
@@ -1402,39 +1172,28 @@ function hasAnyMove(){
 }
 
 /* ---------- 입력: 스와이프 + 방향 버튼 ---------- */
-const boardEl = document.getElementById('board');
-let touchStartX=0, touchStartY=0, touchActive=false;
-boardEl.addEventListener('touchstart', (e)=>{
-  if(e.touches.length!==1) return;
-  touchActive = true;
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-}, {passive:true});
-boardEl.addEventListener('touchend', (e)=>{
-  if(!touchActive) return;
-  touchActive = false;
-  const t = e.changedTouches[0];
-  const dx = t.clientX - touchStartX;
-  const dy = t.clientY - touchStartY;
-  const absX = Math.abs(dx), absY = Math.abs(dy);
-  const threshold = 24;
-  if(Math.max(absX,absY) < threshold) return;
-  if(absX > absY){ move(dx > 0 ? 'right' : 'left'); }
-  else { move(dy > 0 ? 'down' : 'up'); }
-}, {passive:true});
+/* 화면 어디를 쓸어도 인식 (보드 밖 포함). 임계값을 넘는 순간 바로 1회 이동 */
+const gameScreenEl = document.getElementById('screen-game');
+let swipe = null;
+const SWIPE_MIN = 28;
+gameScreenEl.addEventListener('pointerdown', e => {
+  if(e.target.closest && e.target.closest('button')) return;
+  swipe = { id:e.pointerId, x:e.clientX, y:e.clientY, done:false };
+});
+gameScreenEl.addEventListener('pointermove', e => {
+  if(!swipe || swipe.id !== e.pointerId || swipe.done) return;
+  const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  if(Math.max(ax, ay) < SWIPE_MIN) return;
+  swipe.done = true;
+  if(ax > ay) move(dx > 0 ? 'right' : 'left'); else move(dy > 0 ? 'down' : 'up');
+});
+['pointerup','pointercancel','pointerleave'].forEach(t => gameScreenEl.addEventListener(t, () => { swipe = null; }));
 
 [['pad-up','up'],['pad-down','down'],['pad-left','left'],['pad-right','right']].forEach(([id,dir])=>{
   document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); move(dir); });
 });
 
-document.addEventListener('keydown', (e)=>{
-  if(document.getElementById('screen-game').classList.contains('active')){
-    if(e.key==='ArrowUp') move('up');
-    else if(e.key==='ArrowDown') move('down');
-    else if(e.key==='ArrowLeft') move('left');
-    else if(e.key==='ArrowRight') move('right');
-  }
-});
 
 function relayoutBoard(){
   if(document.getElementById('screen-game').classList.contains('active') && board.length) renderBoard(false);
@@ -1454,9 +1213,9 @@ const TIERS = [
 function finishGame(){
   if(gameOver) return;               // 태양 도달 타이머 + 종료 버튼이 겹쳐도 한 번만 처리
   gameOver = true;
-  if(bestStage === 1){               // 한 번도 합치지 못한 경우: 종료 시점 값 사용
+  if(bestStage === 1){               // 한 번도 합치지 못한 경우: 마지막 이동 시점 값 사용 (서버 재현 기준과 동일)
     reachMoves = moveCount;
-    reachMs = performance.now() - gameStartAt;
+    reachMs = moveTimes.length ? moveTimes[moveTimes.length-1] : 0;
   }
   lookupMode = false;
   setStats(bestStage, reachMoves, Math.round(reachMs));
@@ -1547,6 +1306,58 @@ function drawStars(t){
   requestAnimationFrame(drawStars);
 }
 requestAnimationFrame(drawStars);
+
+/* ============== 모바일 보강 ============== */
+/* 이전에 입력한 이름·번호 자동 채우기 */
+window.addEventListener('DOMContentLoaded', () => {
+  if(REMEMBER_IDENTITY){
+    const n = LS.get('pm_name'), p = LS.get('pm_phone');
+    if(n && !$('input-name').value) $('input-name').value = n;
+    if(p && !$('input-phone').value) $('input-phone').value = p;
+  }
+  resendStoredResult();
+  checkServerClosed();
+});
+/* 휴대폰 키보드의 '다음/이동' 키 */
+$('input-name').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('input-phone').focus(); } });
+$('input-phone').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('input-phone').blur(); $('btn-to-howto').click(); } });
+
+/* 운영이 종료됐다면 시작 화면에서 바로 알려 주기 (헛수고 방지) */
+function checkServerClosed(){
+  if(!isConfigured()) return;
+  GET({ action:'info' }).then(d => {
+    if(d && d.ok && d.closed){
+      serverClosed = true;
+      $('closedNotice').style.display = 'block';
+      $('btn-to-howto').disabled = true;
+    }
+  }).catch(() => {});
+}
+
+/* 지난번에 서버에 저장하지 못한 기록이 남아 있으면 조용히 다시 전송 */
+function resendStoredResult(){
+  let raw = null; try { raw = localStorage.getItem('pm_pending'); } catch(e){}
+  if(!raw || !isConfigured() || pendingPayload) return;
+  let payload; try { payload = JSON.parse(raw); } catch(e){ try { localStorage.removeItem('pm_pending'); } catch(_){} return; }
+  POST(payload).then(d => { if(d && d.retry) return; try { localStorage.removeItem('pm_pending'); } catch(e){} }).catch(() => {});
+}
+window.addEventListener('online', resendStoredResult);
+
+/* 전화·앱 전환으로 화면이 가려진 동안은 기록 시간에서 제외, 돌아오면 순위 새로고침 */
+document.addEventListener('visibilitychange', () => {
+  const playing = $('screen-game').classList.contains('active') && !gameOver;
+  if(document.hidden){
+    if(playing && !hiddenAt) hiddenAt = performance.now();
+  } else {
+    if(hiddenAt){ hiddenTotal += performance.now() - hiddenAt; hiddenAt = 0; }
+    if($('screen-result').classList.contains('active') && me && !pendingPayload) refresh(false);
+  }
+});
+
+/* 플레이 중 실수로 뒤로가기·새로고침 시 확인 */
+window.addEventListener('beforeunload', e => {
+  if($('screen-game').classList.contains('active') && !gameOver){ e.preventDefault(); e.returnValue = ''; }
+});
 </script>
 </body>
 </html>
