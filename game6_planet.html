@@ -622,7 +622,7 @@ const PRIZE_NAME = '우주 관련 도서';      // 1위 상품명
 /* 테스트용: false = 중복 참여 제한 해제 (goldenbell과 동일).
    개인 휴대폰(QR)으로만 운영할 때만 true 로. 공용 터치스크린에서는 절대 true 금지 */
 const ENABLE_DEVICE_LIMIT = false;
-const REMEMBER_IDENTITY = false;          // true: 개인 폰·태블릿에서 이름/번호를 기억해 다음 접속 때 자동 입력 (기기를 여러 명이 돌려 쓰면 false)
+const REMEMBER_IDENTITY = true;          // true: 개인 폰·태블릿에서 이름/번호를 기억해 다음 접속 때 자동 입력 (기기를 여러 명이 돌려 쓰면 false)
 /* 운영 종료 후에도 '최종 순위 확인' 버튼을 보여줄지.
    true  = 종료 안내 화면에 [최종 순위 확인하기] 버튼이 남음 (1위 당첨자가 종료 후에도 배송정보를 입력할 수 있음)
    false = 종료 안내 화면만 보이고 아무것도 할 수 없음 (완전 차단) */
@@ -721,6 +721,7 @@ $('btn-to-howto').addEventListener('click', ()=>{
   if(REMEMBER_IDENTITY){ LS.set('pm_name', id.name); LS.set('pm_phone', id.phone); }
   buildChainPreview();
   showScreen('screen-howto');
+  prefetchStart();            // 설명 화면을 읽는 동안 번호표를 미리 받아 둠
 });
 $('back-from-howto').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
 $('btn-to-game').addEventListener('click', ()=>{ playClick(); beginGame($('btn-to-game')); });
@@ -728,8 +729,27 @@ $('btn-retry').addEventListener('click', ()=>{ playClick(); beginGame($('btn-ret
 
 /* 게임 시작 전에 서버에서 '서명된 난수 시드'를 받아 온다 (서버가 같은 게임을 다시 돌려 기록을 검증하기 위함) */
 let starting = false;
+/* 속도 개선: 시작용 번호표(토큰)를 미리 받아 둔다. [시작]/[다시하기]를 누르면 서버를 기다리지 않고 바로 게임이 시작됨
+   (번호표는 6시간 유효, 한 번만 사용 가능. 같은 이름·번호일 때만 사용) */
+let prefetched = null, prefetching = false;
+function prefetchStart(){
+  if(prefetching || prefetched || serverClosed || !isConfigured() || !userName || !userPhone) return;
+  prefetching = true;
+  const nm = userName, ph = userPhone;
+  POST({ action:'start', name:nm, phone:ph }).then(d => {
+    if(d && d.ok && d.token) prefetched = { name:nm, phone:ph, seed:d.seed, token:d.token, at:Date.now() };
+    else if(d && d.closed) applyClosed();
+  }).catch(() => {}).finally(() => { prefetching = false; });
+}
+function takePrefetched(){
+  const p = prefetched; prefetched = null;
+  if(p && p.name === userName && p.phone === userPhone && Date.now() - p.at < 5 * 3600 * 1000) return p;
+  return null;
+}
 function beginGame(btn){
   if(starting) return;
+  const pf = takePrefetched();
+  if(pf){ startGame(pf.seed, pf.token); return; }       // 미리 받아 둔 번호표가 있으면 즉시 시작
   starting = true;
   const label = btn.textContent;
   btn.disabled = true; btn.textContent = '게임 준비 중...';
@@ -895,6 +915,7 @@ function renderStatus(d){
   $('rankNote').innerHTML = d.closed ? '🏁 운영이 종료되어 순위가 확정되었어요.' :
     '※ 다른 참가자가 참여할 때마다 순위가 바뀔 수 있어요.<br>순위는 ①도달 천체 ②이동 횟수 ③걸린 시간 ④먼저 기록한 순서로 정해져요.<br>이 화면은 1분마다 자동 갱신돼요. (' + new Date().toLocaleTimeString('ko-KR') + ' 기준)';
   renderPrize(d);
+  if(!lookupMode && !d.closed) prefetchStart();     // 저장이 끝나면 다음 판(다시하기)용 번호표를 미리 받아 둠
   clearInterval(pollT); if(!d.closed) pollT = setInterval(() => { if(!document.hidden) refresh(false); }, 60000);
 }
 
