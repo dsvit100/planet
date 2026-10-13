@@ -353,6 +353,17 @@
     border:1px solid var(--flare);background:rgba(255,107,129,.1);color:var(--flare);font-weight:700;font-size:14px;line-height:1.6;
   }
 
+  /* 운영 종료 시 화면 전체를 덮는 안내 */
+  #closedOverlay{
+    display:none;position:absolute;inset:0;z-index:100;
+    flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;
+    padding:24px;background:rgba(5,8,25,.97);color:var(--text, #ECEDF6);
+  }
+  #closedOverlay.show{display:flex;}
+  #closedOverlay .co-icon{font-size:56px;}
+  #closedOverlay .co-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:clamp(22px,5vw,30px);}
+  #closedOverlay .co-desc{font-size:15px;line-height:1.7;opacity:.85;max-width:420px;}
+
   .rank-card{width:100%;max-width:440px;background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);border-radius:16px;padding:16px 18px;margin-bottom:14px;text-align:left;}
   .rank-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:15px;text-align:center;margin-bottom:12px;}
   .my-rank{background:rgba(79,216,196,.1);border:1px solid rgba(79,216,196,.4);border-radius:12px;padding:12px;text-align:center;font-family:'Gothic A1',sans-serif;font-weight:800;color:var(--aurora);font-size:15px;margin-bottom:10px;}
@@ -565,6 +576,12 @@
       </div>
 
     </div>
+    <div id="closedOverlay">
+      <div class="co-icon">🏁</div>
+      <div class="co-title">운영이 종료되었습니다</div>
+      <div class="co-desc">정해진 운영 시간이 지나 이 페이지는 더 이상 이용할 수 없어요.<br>참여해 주셔서 감사합니다. (© 부천천문과학관)</div>
+      <button class="launch-btn" id="btn-closed-rank" style="display:none;">🏆 최종 순위 확인하기</button>
+    </div>
     <button id="sound-toggle">🔊</button>
   </div>
 </div>
@@ -600,12 +617,16 @@ function planetOf(stage){ return PLANETS[stage-1]; }
 
 /* ============== 설정 (운영 전 꼭 확인) ============== */
 /* ⚠️ game6_Code.gs 를 Apps Script 웹앱으로 배포한 뒤, 그 URL(…/exec)을 아래에 붙여넣으세요 */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8wFXO9tNR5BzIa9_60B-aOEHbOIqkKCt1bgk2YPeESP0kMLm45Hlif8lvxbwpgOlN8Q/exec";
+const SCRIPT_URL = "여기에_배포_URL_붙여넣기";
 const PRIZE_NAME = '우주 관련 도서';      // 1위 상품명
 /* 테스트용: false = 중복 참여 제한 해제 (goldenbell과 동일).
    개인 휴대폰(QR)으로만 운영할 때만 true 로. 공용 터치스크린에서는 절대 true 금지 */
 const ENABLE_DEVICE_LIMIT = false;
-const REMEMBER_IDENTITY = true;          // true: 개인 폰·태블릿에서 이름/번호를 기억해 다음 접속 때 자동 입력 (기기를 여러 명이 돌려 쓰면 false)
+const REMEMBER_IDENTITY = false;          // true: 개인 폰·태블릿에서 이름/번호를 기억해 다음 접속 때 자동 입력 (기기를 여러 명이 돌려 쓰면 false)
+/* 운영 종료 후에도 '최종 순위 확인' 버튼을 보여줄지.
+   true  = 종료 안내 화면에 [최종 순위 확인하기] 버튼이 남음 (1위 당첨자가 종료 후에도 배송정보를 입력할 수 있음)
+   false = 종료 안내 화면만 보이고 아무것도 할 수 없음 (완전 차단) */
+const ALLOW_RANK_LOOKUP_AFTER_CLOSE = true;
 const ALLOW_RETRY = true;                // 같은 이름·번호로 다시하기 허용 (서버는 '최고 기록'만 반영)
 
 const $ = id => document.getElementById(id);
@@ -715,10 +736,7 @@ function beginGame(btn){
   POST({ action:'start', name:userName, phone:userPhone }).then(d => {
     if(d && d.ok && d.token){ startGame(d.seed, d.token); return; }
     if(d && d.closed){
-      serverClosed = true;
-      $('closedNotice').style.display = 'block'; $('btn-to-howto').disabled = true;
-      alert(d.error || '운영이 종료되었어요.');
-      showScreen('screen-title');
+      applyClosed();
       return;
     }
     alert((d && d.error) || '게임을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
@@ -856,6 +874,7 @@ $('btn-to-ranking').addEventListener('click', () => {
 });
 
 function renderStatus(d){
+  if(d && d.ok === false && d.closed){ pendingPayload = null; try { localStorage.removeItem('pm_pending'); } catch(e){} applyClosed(); return; }   // 저장하려는 순간 운영이 종료된 경우
   if(!d || d.ok === false || d.error){
     const msg = (d && d.error) || '순위를 불러오지 못했어요.';
     if(lookupMode){ alert(msg); showScreen('screen-title'); return; }
@@ -1323,16 +1342,37 @@ $('input-name').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.prev
 $('input-phone').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('input-phone').blur(); $('btn-to-howto').click(); } });
 
 /* 운영이 종료됐다면 시작 화면에서 바로 알려 주기 (헛수고 방지) */
+let closeTimer = null, closedApplied = false;
 function checkServerClosed(){
-  if(!isConfigured()) return;
+  if(!isConfigured() || closedApplied) return;
+  const t0 = performance.now();
   GET({ action:'info' }).then(d => {
-    if(d && d.ok && d.closed){
-      serverClosed = true;
-      $('closedNotice').style.display = 'block';
-      $('btn-to-howto').disabled = true;
+    if(!d || !d.ok) return;
+    if(d.closed){ applyClosed(); return; }
+    /* 서버가 알려준 '종료까지 남은 시간'만큼 기다렸다가, 그 시각이 되면 화면을 자동으로 닫음
+       (참가자 기기의 시계가 틀려도 상관없도록 서버 시각 기준으로 계산) */
+    clearTimeout(closeTimer);
+    if(d.closeAt && d.now){
+      const left = d.closeAt - d.now - (performance.now() - t0);
+      closeTimer = setTimeout(checkServerClosed, Math.max(1000, Math.min(left + 500, 2000000000)));
     }
-  }).catch(() => {});
+  }).catch(() => { closeTimer = setTimeout(checkServerClosed, 10000); });
 }
+/* 운영 종료: 진행 중인 게임을 멈추고 화면 전체를 '종료' 안내로 덮음 */
+function applyClosed(){
+  if(closedApplied) return;
+  closedApplied = true; serverClosed = true; gameOver = true; inputLocked = true;
+  clearTimeout(closeTimer); clearInterval(pollT);
+  $('closedNotice').style.display = 'block';
+  $('btn-to-howto').disabled = true;
+  $('btn-closed-rank').style.display = ALLOW_RANK_LOOKUP_AFTER_CLOSE ? '' : 'none';
+  $('closedOverlay').classList.add('show');
+}
+$('btn-closed-rank').addEventListener('click', () => {
+  pendingPayload = null; me = null; lookupMode = false;
+  $('closedOverlay').classList.remove('show');
+  showScreen('screen-title');          // 시작 화면으로 이동 (시작하기 버튼은 비활성, 순위 확인만 가능)
+});
 
 /* 지난번에 서버에 저장하지 못한 기록이 남아 있으면 조용히 다시 전송 */
 function resendStoredResult(){
@@ -1350,6 +1390,7 @@ document.addEventListener('visibilitychange', () => {
     if(playing && !hiddenAt) hiddenAt = performance.now();
   } else {
     if(hiddenAt){ hiddenTotal += performance.now() - hiddenAt; hiddenAt = 0; }
+    checkServerClosed();       // 화면이 꺼져 있던 사이 종료 시각이 지났는지 다시 확인
     if($('screen-result').classList.contains('active') && me && !pendingPayload) refresh(false);
   }
 });
