@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>행성 수박게임 | 부천천문과학관</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
     background:#000;
     color:var(--text-main);
     font-family:'Gowun Dodum', sans-serif;
-    overflow:hidden;
+    overflow:hidden;overscroll-behavior:none;
     word-break:keep-all;
     overflow-wrap:break-word;
     touch-action:manipulation;
@@ -39,17 +39,14 @@
     font-family:inherit;
   }
   #frame-outer{
-    height:100vh;width:100vw;
-    display:flex;align-items:center;justify-content:center;
+    height:100vh;height:100dvh;width:100vw;
+    display:flex;align-items:stretch;justify-content:center;
     background:#000;
   }
   #frame{
     position:relative;
     background:var(--deep-space);
-    aspect-ratio:16/9;
-    width:100%;
-    max-height:100%;
-    max-width:calc(100vh * 16 / 9);
+    width:100%;height:100%;
     overflow:hidden;
     touch-action:none;
   }
@@ -58,10 +55,16 @@
   .screen{
     display:none;
     position:absolute;inset:0;
-    flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;
     animation:fadein .4s ease;
-    padding:28px;
+    padding:calc(22px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) calc(16px + env(safe-area-inset-left,0px));
+    overscroll-behavior:contain;
+    /* 내용이 길어지면(순위·배송정보 입력 등) 화면 안에서 스크롤, 짧으면 가운데 정렬 */
+    overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch;
   }
+  .screen > *{max-width:100%;}
+  .screen:not(#screen-game) > :first-child{margin-top:auto;}
+  .screen:not(#screen-game) > :last-child{margin-bottom:auto;}
   .screen.active{display:flex;}
   @keyframes fadein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
@@ -99,7 +102,7 @@
 
   /* 게임 플레이 화면 우측 상단 게임 종료 버튼 */
   #btn-quit-game{
-    position:absolute;top:14px;right:16px;z-index:15;
+    position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:15;
     font-family:'Gothic A1',sans-serif;font-weight:800;font-size:12.5px;
     background:rgba(19,26,61,.9);color:var(--flare);
     border:1px solid var(--flare);border-radius:999px;
@@ -137,9 +140,14 @@
   .rule-text{font-size:15px;color:var(--text-main);line-height:1.6;}
 
   /* 게임 화면 */
-  #screen-game{padding:14px;justify-content:flex-start;}
+  #screen-game{
+    --board:min(92vw, 640px, calc(100vh - 360px));
+    padding:calc(58px + env(safe-area-inset-top,0px)) calc(12px + env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-left,0px));
+    justify-content:flex-start;overflow:hidden;
+  }
+  @supports (height:100dvh){ #screen-game{ --board:min(92vw, 640px, calc(100dvh - 360px)); } }
   #hud{
-    width:100%;max-width:520px;
+    width:var(--board);min-width:260px;max-width:100%;
     display:flex;align-items:center;justify-content:space-between;
     padding:6px 6px 14px;
   }
@@ -150,8 +158,8 @@
 
   #board-wrap{
     position:relative;
-    width:min(78vh, 92vw, 480px);
-    max-width:100%;
+    width:var(--board);
+    min-width:240px;max-width:100%;
   }
   #board{
     position:relative;
@@ -252,18 +260,11 @@
   @keyframes tilemerge{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
   .tile.sun{box-shadow:0 0 26px 8px rgba(245,200,107,.75);}
 
-  #softcap-banner{
-    position:absolute;top:64px;left:50%;transform:translateX(-50%);
-    font-family:'Gowun Dodum',sans-serif;font-size:13px;
-    background:rgba(19,26,61,.9);border:1px solid rgba(79,216,196,.4);
-    color:var(--aurora);padding:8px 16px;border-radius:999px;
-    opacity:0;transition:opacity .4s ease;pointer-events:none;z-index:10;
-  }
-  #softcap-banner.show{opacity:1;}
 
   /* 방향 패드 (크게, 간격도 넉넉하게 — 화면 높이에 비례해서 작은 해상도에서도 잘리지 않도록 함) */
   #dpad{
     margin-top:clamp(10px, 3vh, 26px);
+    touch-action:none;
     display:grid;
     grid-template-columns:repeat(3, clamp(60px, 8.5vh, 100px));
     grid-template-rows:repeat(2, clamp(60px, 8.5vh, 100px));
@@ -298,8 +299,8 @@
   .result-btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
 
   #sound-toggle{
-    position:absolute;bottom:16px;right:16px;z-index:20;
-    width:42px;height:42px;border-radius:50%;
+    position:absolute;bottom:calc(12px + env(safe-area-inset-bottom,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:20;
+    width:40px;height:40px;border-radius:50%;
     background:rgba(19,26,61,.85);border:1.5px solid rgba(183,192,232,.5);
     color:var(--text-main);font-size:18px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
@@ -315,19 +316,13 @@
   .field-panel .field-label{display:block;font-size:12px;color:var(--text-dim);letter-spacing:.05em;margin-bottom:10px;}
   input.arcade-input{
     width:100%;padding:13px 12px;background:var(--deep-space);border:2px solid rgba(183,192,232,.5);
-    color:var(--text-main);font-family:'Gothic A1',sans-serif;font-weight:700;font-size:14px;
+    color:var(--text-main);font-family:'Gothic A1',sans-serif;font-weight:700;font-size:16px;  /* 16px 미만이면 iOS가 입력 시 화면을 확대함 */
     border-radius:8px;outline:none;letter-spacing:.02em;
   }
   input.arcade-input:focus{border-color:var(--aurora);}
-  #rank-submit-msg{font-size:13px;color:var(--leaf);margin-top:10px;text-align:center;display:none;}
   .row{display:flex;gap:10px;width:100%;margin-top:14px;}
   .row .launch-btn, .row .ghost-btn{flex:1;margin-top:0;padding-left:16px;padding-right:16px;text-align:center;}
 
-  table.board{width:100%;max-width:520px;border-collapse:collapse;font-size:13px;margin-top:6px;}
-  table.board th{color:var(--text-dim);font-size:10.5px;text-align:left;padding:8px 6px;border-bottom:1px solid var(--grid-line);letter-spacing:.05em;}
-  table.board td{padding:9px 6px;border-bottom:1px solid rgba(183,192,232,.2);color:var(--text-main);text-align:left;}
-  table.board tr.top td{color:var(--starlight);}
-  .rank-badge{display:inline-block;width:20px;color:var(--aurora);font-weight:700;}
 
   /* 랭킹 보기 버튼: 시작하기 버튼과 완전히 동일한 크기, 색상만 구분 */
   .rank-btn{
@@ -339,29 +334,6 @@
   }
   .rank-btn:active{transform:scale(.96);}
 
-  .status-pill{
-    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;letter-spacing:.05em;
-    padding:6px 12px;border:1px solid var(--grid-line);border-radius:20px;color:var(--text-dim);
-    margin-bottom:6px;
-  }
-  .status-dot{width:7px;height:7px;border-radius:50%;background:#555;}
-  .status-dot.on{background:var(--leaf);box-shadow:0 0 6px var(--leaf);}
-  .admin-link{font-size:10.5px;color:var(--text-dim);opacity:.8;letter-spacing:.05em;cursor:pointer;margin-top:14px;}
-  .admin-link:active{opacity:1;color:var(--flare);}
-
-  .admin-warn-box{
-    width:100%;max-width:480px;background:rgba(255,107,129,.08);
-    border:1px solid var(--flare);border-radius:14px;
-    padding:18px 18px 16px;margin-bottom:20px;text-align:center;
-  }
-  .admin-warn-box .eyebrow{color:var(--flare);margin-bottom:8px;}
-  .admin-warn-box h1{margin:0;font-size:20px;}
-  #admin-error{font-size:11.5px;color:var(--flare);margin-top:12px;display:none;}
-
-  .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px;margin-top:14px;margin-bottom:14px;}
-  .stat-box{background:var(--panel-navy);border:1px solid var(--grid-line);padding:14px 10px;text-align:center;border-radius:10px;}
-  .stat-box .v{font-size:20px;color:var(--aurora);font-family:'Gothic A1',sans-serif;font-weight:800;}
-  .stat-box .l{font-size:10.5px;color:var(--text-dim);margin-top:6px;letter-spacing:.03em;}
 
   /* ===== 터치스크린 화면 키보드 (Space War 2095와 동일 형식, 색상만 이 게임 톤에 맞춤) ===== */
   .touch-kb{
@@ -413,6 +385,81 @@
     .touch-kb-key{height:40px;font-size:14px;}
     .touch-kb-lang{padding:7px 10px;font-size:12px;min-width:48px;}
   }
+
+  /* ===== 입력 / 순위 / 상품(1위 배송정보) ===== */
+  input{-webkit-user-select:text;user-select:text;}
+  .launch-btn:disabled,.rank-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .id-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .id-grid .field-label{margin-bottom:6px;}
+  .field-panel.compact{margin-bottom:6px;}
+  .title-note{max-width:440px;font-size:12.5px;line-height:1.7;color:var(--text-dim);margin:14px 0 0;}
+  .title-note b{color:var(--starlight);}
+  .credit{font-family:'Gothic A1',sans-serif;font-weight:600;font-size:clamp(10px,1.6vw,12px);color:var(--text-dim);line-height:1.6;margin-top:12px;}
+  .notice-box{
+    display:none;max-width:440px;margin-top:12px;padding:12px 16px;border-radius:12px;
+    border:1px solid var(--flare);background:rgba(255,107,129,.1);color:var(--flare);font-weight:700;font-size:14px;line-height:1.6;
+  }
+  body.kb-open .screen{padding-bottom:340px;}
+
+  .rank-card{width:100%;max-width:440px;background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);border-radius:16px;padding:16px 18px;margin-bottom:14px;text-align:left;}
+  .rank-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:15px;text-align:center;margin-bottom:12px;}
+  .my-rank{background:rgba(79,216,196,.1);border:1px solid rgba(79,216,196,.4);border-radius:12px;padding:12px;text-align:center;font-family:'Gothic A1',sans-serif;font-weight:800;color:var(--aurora);font-size:15px;margin-bottom:10px;}
+  .my-rank small{display:block;margin-top:4px;font-weight:600;font-size:12px;color:var(--text-dim);}
+  .leader-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(183,192,232,.2);font-weight:700;font-size:14px;}
+  .leader-row:last-child{border-bottom:none;}
+  .leader-meta{font-size:12px;font-weight:600;color:var(--text-dim);text-align:right;line-height:1.5;}
+  .medal{font-size:18px;margin-right:6px;}
+  .loading{text-align:center;color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:10px;}
+  .mini-btn{margin-top:12px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--aurora);background:transparent;color:var(--aurora);font-family:'Gothic A1',sans-serif;font-weight:800;font-size:13px;cursor:pointer;}
+  .mini-btn:active{background:rgba(79,216,196,.15);}
+
+  .prize{width:100%;max-width:440px;margin-bottom:14px;border-radius:16px;padding:16px 18px;background:var(--panel-navy-2);border:1px solid rgba(245,200,107,.45);text-align:left;font-size:13.5px;line-height:1.65;}
+  .prize h3{margin:0 0 8px;font-family:'Gothic A1',sans-serif;font-weight:800;font-size:16px;color:var(--starlight);}
+  .prize p{margin:8px 0;}
+  .prize .warn{background:rgba(245,200,107,.12);border:1px solid rgba(245,200,107,.4);border-radius:10px;padding:10px 12px;font-size:12.5px;}
+  .prize .ok{background:rgba(107,230,166,.12);border:1px solid rgba(107,230,166,.45);border-radius:10px;padding:10px 12px;}
+  .prize .pf label{display:block;font-size:12.5px;color:var(--text-dim);margin:10px 0 4px;}
+  .prize .pf label.chk{display:flex;gap:8px;align-items:flex-start;margin:10px 0;color:var(--text-main);font-weight:700;font-size:12.5px;}
+  .prize .pf label.chk input{margin-top:3px;flex-shrink:0;width:18px;height:18px;}
+  .prize details{font-size:12px;color:var(--text-dim);background:rgba(9,12,31,.5);border-radius:10px;padding:8px 10px;margin:10px 0;line-height:1.7;}
+  .prize details summary{cursor:pointer;color:var(--text-main);}
+  .prize .pf .launch-btn{width:100%;margin-top:8px;padding:13px;font-size:15px;}
+
+  /* ===== 반응형: 가로 화면(폰 가로·태블릿 가로·PC) — 보드는 왼쪽, HUD·방향키는 오른쪽 ===== */
+  @media (orientation:landscape){
+    #screen-game{
+      --board:min(calc(100vh - 28px), 62vw, 720px);
+      padding:calc(10px + env(safe-area-inset-top,0px)) calc(14px + env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) calc(14px + env(safe-area-inset-left,0px));
+    }
+    @supports (height:100dvh){ #screen-game{ --board:min(calc(100dvh - 28px), 62vw, 720px); } }
+    #screen-game.active{
+      display:grid;
+      grid-template-columns:auto minmax(170px, 260px);
+      grid-template-rows:1fr 1fr;
+      grid-template-areas:"board hud" "board pad";
+      column-gap:clamp(14px, 3vw, 36px);
+      justify-content:center;align-content:stretch;align-items:center;
+    }
+    #screen-game #board-wrap{grid-area:board;align-self:center;min-width:0;}
+    #screen-game #hud{grid-area:hud;align-self:end;width:100%;min-width:0;padding-bottom:10px;}
+    #screen-game #dpad{grid-area:pad;align-self:start;justify-self:center;margin-top:10px;}
+    #btn-quit-game{top:calc(8px + env(safe-area-inset-top,0px));}
+  }
+  /* 아주 좁은 폰(세로 360px 이하): 입력칸을 한 줄씩 */
+  @media (max-width:360px){
+    .id-grid{grid-template-columns:1fr;}
+    #chain-preview{gap:2px;}
+  }
+  /* 작은 화면에서는 글자·여백을 조금 줄임 */
+  @media (max-width:480px){
+    p.lead{font-size:15px;margin-bottom:20px;}
+    .rule-row{padding:11px 14px;}
+    .rule-text{font-size:14px;}
+    .stat-card{min-width:0;flex:1 1 90px;padding:12px 10px;}
+    #stat-row{width:100%;max-width:440px;}
+  }
+  /* 휴대폰 기본 키보드가 올라오면 입력칸이 가려지지 않도록 아래 여백 확보 (visualViewport 기반) */
+  body.vk-open .screen{padding-bottom:calc(var(--vk,0px) + 24px);}
 </style>
 </head>
 <body>
@@ -424,9 +471,27 @@
       <div class="screen active" id="screen-title">
         <div class="eyebrow">PLANET MERGE · 우주 미니게임</div>
         <h1 class="title">행성 수박게임</h1>
-        <p class="lead">같은 행성을 합쳐서<br>태양까지 만들어보세요!</p>
-        <button class="launch-btn" id="btn-to-howto">시작하기</button>
-        <button class="rank-btn" id="btn-to-ranking">🏆 랭킹 보기</button>
+        <p class="lead" style="margin-bottom:18px;">같은 행성을 합쳐서<br>태양까지 만들어보세요!</p>
+        <div class="field-panel compact">
+          <div class="id-grid">
+            <div>
+              <label class="field-label" for="input-name">이름</label>
+              <input class="arcade-input" id="input-name" maxlength="10" placeholder="예) 김민준" autocomplete="off" data-kb data-kb-title="이름 입력">
+            </div>
+            <div>
+              <label class="field-label" for="input-phone">휴대폰 번호 뒷 4자리</label>
+              <input class="arcade-input" id="input-phone" type="tel" maxlength="4" inputmode="numeric" placeholder="예) 1234" autocomplete="off" data-kb data-kb-title="휴대폰 번호 뒷 4자리 입력">
+            </div>
+          </div>
+        </div>
+        <button class="launch-btn" id="btn-to-howto" style="margin-top:10px;">시작하기</button>
+        <div class="notice-box" id="blockNotice">😊 이미 참여하셨습니다!<br>참여해 주셔서 감사합니다.</div>
+        <button class="rank-btn" id="btn-to-ranking">🏆 내 순위 다시 확인하기</button>
+        <p class="title-note" id="titleNote"></p>
+        <div class="credit">
+          © 부천천문과학관. All rights reserved.<br>
+          Developed by 김민찬
+        </div>
       </div>
 
       <div class="screen" id="screen-howto">
@@ -457,7 +522,6 @@
           </div>
         </div>
         <div id="board-wrap">
-          <div id="softcap-banner">슬슬 마무리해볼까요?</div>
           <div id="board">
             <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
             <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
@@ -475,89 +539,37 @@
       </div>
 
       <div class="screen" id="screen-result">
-        <div class="topbar"><span class="link-back" id="back-from-result">← 뒤로</span></div>
-        <div class="result-title">RESULT</div>
+        <div class="topbar"><span class="link-back" id="back-from-result">← 처음으로</span></div>
+        <div class="result-title" id="result-title">RESULT</div>
         <div id="result-tier">태양계 견습생 🪨</div>
         <div id="stat-row">
           <div class="stat-card"><div class="stat-num" id="stat-best">수성</div><div class="stat-lbl">도달 천체</div></div>
-          <div class="stat-card"><div class="stat-num" id="stat-moves">0</div><div class="stat-lbl">이동 횟수</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-moves">0</div><div class="stat-lbl">도달까지 이동 횟수</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-time">0초</div><div class="stat-lbl">도달까지 걸린 시간</div></div>
         </div>
+
+        <div class="rank-card">
+          <div class="rank-title">🏆 실시간 랭킹</div>
+          <div class="loading" id="rankLoading">순위를 불러오는 중...</div>
+          <div id="rankContent" style="display:none;">
+            <div class="my-rank" id="myRank">나의 순위: -</div>
+            <div id="top3List"></div>
+            <div class="loading" id="rankNote"></div>
+            <div style="text-align:center;"><button class="mini-btn" onclick="refresh(true)">🔄 지금 새로고침</button></div>
+          </div>
+        </div>
+        <div class="prize" id="prizeCard" style="display:none"></div>
+
         <div id="fact-card">
           <div class="fact-label">천체 정보</div>
           <div class="fact-name" id="fact-name">수성</div>
           <div class="fact-desc" id="fact-desc">태양계에서 가장 작고 태양에 가장 가까운 행성이에요.</div>
         </div>
 
-        <div id="panel-nickname" class="field-panel">
-          <label class="field-label">랭킹에 등록할 닉네임</label>
-          <input class="arcade-input" id="input-nickname" maxlength="10" placeholder="탐사대원-01">
-          <div class="row">
-            <button class="launch-btn" id="btn-submit-score" style="padding:13px 20px;font-size:15px;">랭킹 등록</button>
-          </div>
-          <div id="rank-submit-msg">✔ 랭킹에 등록되었어요!</div>
-          <button class="rank-btn" id="btn-view-ranking" style="display:none;width:100%;margin-top:10px;">🏆 랭킹에서 내 순위 확인하기</button>
-        </div>
-
         <div class="result-btn-row">
           <button class="launch-btn" id="btn-retry">다시하기</button>
           <button class="ghost-btn" id="btn-to-title">처음 화면으로</button>
         </div>
-      </div>
-
-      <!-- 공개 랭킹 (비밀번호 없이 누구나 확인) -->
-      <div class="screen" id="screen-ranking">
-        <div class="topbar">
-          <span class="link-back" id="back-from-ranking">← 뒤로</span>
-          <span class="eyebrow" style="margin:0;">RANKING</span>
-        </div>
-        <h1 class="title" style="font-size:clamp(20px,4vw,26px);margin-bottom:10px;">랭킹</h1>
-        <span class="status-pill"><span class="status-dot on"></span><span id="ranking-count-label">0명 등록</span></span>
-        <table class="board">
-          <thead><tr><th>순위</th><th>닉네임</th><th>도달 천체</th><th style="text-align:right;">이동횟수</th></tr></thead>
-          <tbody id="ranking-board-body"></tbody>
-        </table>
-        <div style="text-align:center; font-family:'Gothic A1', sans-serif; font-weight:600; font-size:clamp(10px,1.6vw,12px); color:var(--text-dim); line-height:1.6; margin-top:12px;">
-          © 부천천문과학관. All rights reserved.<br>
-          Developed by 김민찬
-        </div>
-        <span class="admin-link" id="btn-goto-admin">관리자 입장</span>
-      </div>
-
-      <!-- 관리자 인증 -->
-      <div class="screen" id="screen-admin-login">
-        <div class="admin-warn-box">
-          <div class="topbar" style="margin-bottom:14px;"><span class="link-back" id="back-from-adminlogin">← 뒤로</span></div>
-          <div class="eyebrow" style="margin-top:0;">RESTRICTED ACCESS</div>
-          <h1 class="title">관리자 인증</h1>
-        </div>
-        <div id="panel-adminpass" class="field-panel">
-          <label class="field-label">관리자 비밀번호</label>
-          <input class="arcade-input" id="input-adminpass" type="password" placeholder="••••••••">
-          <div class="row">
-            <button class="launch-btn" id="btn-admin-login" style="padding:13px 20px;font-size:15px;">인증</button>
-          </div>
-          <p id="admin-error">비밀번호가 올바르지 않습니다.</p>
-        </div>
-      </div>
-
-      <!-- 관리자 대시보드 -->
-      <div class="screen" id="screen-admin">
-        <div class="topbar">
-          <span class="link-back" id="btn-admin-logout">← 로그아웃</span>
-          <span class="eyebrow" style="margin:0;">CONTROL DECK</span>
-        </div>
-        <h1 class="title" style="font-size:clamp(20px,4vw,26px);margin-bottom:6px;">랭킹 관리</h1>
-        <div class="admin-grid">
-          <div class="stat-box"><div class="v" id="admin-total">0</div><div class="l">등록된 기록</div></div>
-          <div class="stat-box"><div class="v" id="admin-top">-</div><div class="l">도달 천체</div></div>
-        </div>
-        <div class="row" style="max-width:480px;">
-          <button class="ghost-btn" id="btn-admin-reset" style="margin-top:0;">랭킹 초기화</button>
-        </div>
-        <table class="board">
-          <thead><tr><th>순위</th><th>닉네임</th><th>도달 천체</th><th style="text-align:right;">이동횟수</th></tr></thead>
-          <tbody id="admin-board-body"></tbody>
-        </table>
       </div>
 
     </div>
@@ -569,7 +581,7 @@
 <div class="touch-kb" id="touchKeyboard" aria-hidden="true">
   <div class="touch-kb-inner">
     <div class="touch-kb-head">
-      <span class="touch-kb-title" id="touchKbTitle">닉네임 입력</span>
+      <span class="touch-kb-title" id="touchKbTitle">입력</span>
       <div class="touch-kb-head-right">
         <button type="button" class="touch-kb-lang" id="touchKbLang">한/영</button>
         <button type="button" class="touch-kb-done" id="touchKbDone">완료 ▼</button>
@@ -583,6 +595,7 @@
       <button type="button" class="touch-kb-key touch-kb-wide touch-kb-shift" id="touchKbShift" data-key="__shift">⇧ 쌍자음</button>
       <button type="button" class="touch-kb-key touch-kb-space" data-key=" ">스페이스</button>
       <button type="button" class="touch-kb-key touch-kb-wide" data-key="-">-</button>
+      <button type="button" class="touch-kb-key touch-kb-wide" data-key=",">,</button>
       <button type="button" class="touch-kb-key touch-kb-wide touch-kb-back" data-key="__back">⌫ 지우기</button>
     </div>
   </div>
@@ -599,7 +612,7 @@ document.addEventListener('touchmove', function(e){
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function(e){
   const now = Date.now();
-  if(now - lastTouchEnd <= 300) e.preventDefault();
+  if(now - lastTouchEnd <= 300 && !(e.target.closest && e.target.closest('button,input,label,summary,a'))) e.preventDefault();
   lastTouchEnd = now;
 }, { passive:false });
 
@@ -617,59 +630,115 @@ const PLANETS = [
 ];
 function planetOf(stage){ return PLANETS[stage-1]; }
 
+/* ============== 설정 (운영 전 꼭 확인) ============== */
+/* ⚠️ game6_Code.gs 를 Apps Script 웹앱으로 배포한 뒤, 그 URL(…/exec)을 아래에 붙여넣으세요 */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8wFXO9tNR5BzIa9_60B-aOEHbOIqkKCt1bgk2YPeESP0kMLm45Hlif8lvxbwpgOlN8Q/exec";
+const PRIZE_NAME = '우주 관련 도서';      // 1위 상품명
+/* 테스트용: false = 중복 참여 제한 해제 (goldenbell과 동일).
+   개인 휴대폰(QR)으로만 운영할 때만 true 로. 공용 터치스크린에서는 절대 true 금지 */
+const ENABLE_DEVICE_LIMIT = false;
+const ALLOW_RETRY = true;                // 같은 이름·번호로 다시하기 허용 (서버는 '최고 기록'만 반영)
+const USE_TOUCH_KEYBOARD = false;        // 개인 휴대폰·태블릿: false (기본 키보드 사용) / 공용 키오스크 터치스크린: true
+
+const $ = id => document.getElementById(id);
+let userName = '', userPhone = '';
+let me = null, pollT = null, prizeKey = '', lookupMode = false, pendingPayload = null;
+
 /* ============== 화면 전환 ============== */
 const screens = document.querySelectorAll('.screen');
 function showScreen(id){
   screens.forEach(s => s.classList.toggle('active', s.id === id));
-  // 타이틀로 돌아갈 때는 랭킹 등록 때 썼던 닉네임/등록 상태를 항상 빈 칸으로 초기화
-  if(id === 'screen-title'){
-    const nickInput = document.getElementById('input-nickname');
-    if(nickInput){ nickInput.value = ''; nickInput.disabled = false; }
-    const submitBtn = document.getElementById('btn-submit-score');
-    if(submitBtn){ submitBtn.disabled = false; submitBtn.style.opacity = ''; }
-    const msg = document.getElementById('rank-submit-msg');
-    if(msg) msg.style.display = 'none';
-    const viewRankBtn = document.getElementById('btn-view-ranking');
-    if(viewRankBtn) viewRankBtn.style.display = 'none';
-  }
+  if(id !== 'screen-result') clearInterval(pollT);          // 결과 화면을 떠나면 자동 갱신 중지
   if(window.closeTouchKeyboard) window.closeTouchKeyboard();
-  resetIdleTimer();
+  const el = $(id); if(el) el.scrollTop = 0;
 }
-document.getElementById('btn-to-howto').addEventListener('click', ()=>{ playClick(); buildChainPreview(); showScreen('screen-howto'); });
-document.getElementById('back-from-howto').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
-document.getElementById('btn-to-game').addEventListener('click', ()=>{ playClick(); startGame(); });
-document.getElementById('btn-retry').addEventListener('click', ()=>{ playClick(); startGame(); });
-document.getElementById('btn-to-title').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
-document.getElementById('back-from-result').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
 
-/* ---------- 랭킹 화면 ---------- */
-document.getElementById('btn-to-ranking').addEventListener('click', ()=>{ playClick(); showScreen('screen-ranking'); renderRankingBoard(); });
-document.getElementById('back-from-ranking').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
+/* ---------------- 기기 중복 참여 체크 (goldenbell과 동일) ---------------- */
+const DONE_KEY = 'planetmerge_done';
+function hasAlreadyParticipated(){
+  if(!ENABLE_DEVICE_LIMIT) return false;
+  try { return localStorage.getItem(DONE_KEY) === 'true'; } catch(e){ return false; }
+}
+function markParticipated(){
+  if(!ENABLE_DEVICE_LIMIT) return;
+  try { localStorage.setItem(DONE_KEY, 'true'); } catch(e){}
+}
+const canRetry = () => ALLOW_RETRY && !ENABLE_DEVICE_LIMIT;
+const LS = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+function isConfigured(){ return /^https:\/\/script\.google\.com\//.test(SCRIPT_URL); }
+function warnNotConfigured(){ alert('⚠️ 서버 주소(SCRIPT_URL)가 아직 설정되지 않았어요.\n관리자에게 문의해 주세요.'); }
 
-/* ---------- 관리자 인증/대시보드 ---------- */
-const ADMIN_PASSWORD = 'alien0707';
-let screenBeforeAdminLogin = 'screen-ranking';
-document.getElementById('btn-goto-admin').addEventListener('click', ()=>{
-  playClick();
-  screenBeforeAdminLogin = document.querySelector('.screen.active')?.id || 'screen-ranking';
-  document.getElementById('input-adminpass').value = '';
-  document.getElementById('admin-error').style.display = 'none';
-  showScreen('screen-admin-login');
-});
-document.getElementById('back-from-adminlogin').addEventListener('click', ()=>{ playClick(); showScreen(screenBeforeAdminLogin); });
-document.getElementById('btn-admin-login').addEventListener('click', ()=>{
-  const val = document.getElementById('input-adminpass').value;
-  if(val === ADMIN_PASSWORD){
-    document.getElementById('admin-error').style.display = 'none';
-    showScreen('screen-admin');
-    renderAdminBoard();
-  } else {
-    document.getElementById('admin-error').style.display = 'block';
+window.addEventListener('DOMContentLoaded', () => {
+  $('titleNote').innerHTML =
+    `🎁 운영 시간 종료 시점의 <b>1위</b>에게 상품을 집으로 보내드려요! (상품: <b>${PRIZE_NAME}</b>)<br>` +
+    `순위 기준: ① 태양에 가까이 도달 ② 이동 횟수가 적은 순 ③ 걸린 시간이 짧은 순<br>` +
+    `입력하신 이름·번호 뒷 4자리는 순위 집계와 1위 확인에만 사용돼요.` +
+    (ENABLE_DEVICE_LIMIT ? '<br>* 1인 1회 참여 가능합니다 (동일 기기 기준)' : '');
+  if(hasAlreadyParticipated()){
+    $('blockNotice').style.display = 'block';
+    $('btn-to-howto').disabled = true;
   }
 });
-document.getElementById('btn-admin-logout').addEventListener('click', ()=>{ playClick(); showScreen('screen-ranking'); renderRankingBoard(); });
 
-/* 한 번 더 눌러야 실행되는 '확인' 버튼 (게임 종료 / 랭킹 초기화처럼 실수로 누르면 안 되는 동작용) */
+/* 휴대폰 기본 키보드: 키보드 높이만큼 여백을 주고, 입력 중인 칸을 화면 가운데로 */
+(function setupNativeKeyboardAssist(){
+  if(USE_TOUCH_KEYBOARD) return;
+  const vv = window.visualViewport;
+  if(vv){
+    const upd = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      document.documentElement.style.setProperty('--vk', kb + 'px');
+      document.body.classList.toggle('vk-open', kb > 80);
+    };
+    vv.addEventListener('resize', upd); vv.addEventListener('scroll', upd);
+  }
+  document.addEventListener('focusin', e => {
+    const t = e.target;
+    if(t && t.matches && t.matches('input[type=text],input[type=tel]'))
+      setTimeout(() => { try { t.scrollIntoView({ block:'center', behavior:'smooth' }); } catch(_){} }, 350);
+  });
+})();
+
+/* 번호 입력칸은 숫자만 */
+$('input-phone').addEventListener('input', e => {
+  const v = e.target.value.replace(/\D/g,'').slice(0,4);
+  if(v !== e.target.value) e.target.value = v;
+});
+function readIdentity(){
+  return { name: $('input-name').value.replace(/\s+/g,' ').trim(), phone: $('input-phone').value.trim() };
+}
+
+/* 처음 화면으로: 다음 사람을 위해 입력값·개인정보 입력창 모두 비움 */
+function goTitle(){
+  if(pendingPayload && !confirm('아직 기록이 서버에 저장되지 않았어요.\n그래도 처음 화면으로 갈까요?')) return;
+  pendingPayload = null; me = null; lookupMode = false; prizeKey = '';
+  $('input-name').value = ''; $('input-phone').value = '';
+  $('prizeCard').innerHTML = ''; $('prizeCard').style.display = 'none';
+  showScreen('screen-title');
+}
+
+/* ---------------- 시작 / 이동 ---------------- */
+$('btn-to-howto').addEventListener('click', ()=>{
+  if(hasAlreadyParticipated()) return;
+  const id = readIdentity();
+  if(!id.name){ alert('이름을 입력해 주세요.'); return; }
+  if(!/^\d{4}$/.test(id.phone)){ alert('휴대폰 번호 뒷 4자리를 숫자로 입력해 주세요.'); return; }
+  if(!isConfigured()){ warnNotConfigured(); return; }
+  playClick();
+  userName = id.name; userPhone = id.phone;
+  buildChainPreview();
+  showScreen('screen-howto');
+});
+$('back-from-howto').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
+$('btn-to-game').addEventListener('click', ()=>{ playClick(); startGame(); });
+$('btn-retry').addEventListener('click', ()=>{ playClick(); startGame(); });
+$('btn-to-title').addEventListener('click', ()=>{ playClick(); goTitle(); });
+$('back-from-result').addEventListener('click', ()=>{ playClick(); goTitle(); });
+
+/* 한 번 더 눌러야 실행되는 '확인' 버튼 (게임 종료처럼 실수로 누르면 안 되는 동작용) */
 function armConfirmButton(btn, confirmLabel, action, timeout=3000){
   const original = btn.textContent;
   let armed = false, timer = null;
@@ -686,97 +755,172 @@ function armConfirmButton(btn, confirmLabel, action, timeout=3000){
     }
   });
 }
-armConfirmButton(document.getElementById('btn-quit-game'), '정말 종료? (다시 클릭)', () => {
+armConfirmButton($('btn-quit-game'), '정말 종료? (다시 클릭)', () => {
   if(gameOver) return;
   playClick();
   inputLocked = true;
   finishGame();
 });
-armConfirmButton(document.getElementById('btn-admin-reset'), '정말 초기화? (다시 클릭)', () => {
-  resetRankings();
-  renderAdminBoard();
-});
 
-/* ---------- 랭킹 데이터 (이 기기의 브라우저에 저장 · localStorage) ---------- */
-/* 랭킹 기준: 최고 도달 천체(bestStage)가 높을수록 우선, 같으면 이동횟수(moves)가 적을수록 상위 */
-const RANK_KEY = 'planetMerge_rankings_v2';
-function loadRankings(){
-  try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
-  catch(e){ return []; }
-}
-function saveRankings(list){
-  try { localStorage.setItem(RANK_KEY, JSON.stringify(list)); } catch(e){}
-}
-function makeEntryId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-function addRanking(nick, bestStageVal, bestName, movesVal){
-  const list = loadRankings();
-  const id = makeEntryId();
-  list.push({ id, nickname: nick, bestStage: bestStageVal, best: bestName, moves: movesVal, at: Date.now() });
-  list.sort((a,b)=> (b.bestStage-a.bestStage) || (a.moves-b.moves) || (b.at-a.at));
-  saveRankings(list.slice(0,200));
-  return id;
-}
-function resetRankings(){ saveRankings([]); }
-// 동순위 처리 (예: 1,2,2,4,5) — list는 최고천체 내림차순, 이동횟수 오름차순으로 정렬되어 있어야 함
-function computeRanks(list){
-  let rank = 0, prevKey = null;
-  return list.map((p, i) => {
-    const key = p.bestStage + '_' + p.moves;
-    if (key !== prevKey){ rank = i + 1; prevKey = key; }
-    return { ...p, rank };
-  });
-}
+/* ---------------- 유틸 ---------------- */
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function renderRankingBoard(){
-  const list = loadRankings();
-  document.getElementById('ranking-count-label').textContent = list.length + '명 등록';
-  const body = document.getElementById('ranking-board-body');
-  const ranked = computeRanks(list).slice(0,20);
-  body.innerHTML = ranked.map(p => `
-    <tr class="${p.rank===1?'top':''}">
-      <td><span class="rank-badge">${p.rank}</span></td>
-      <td>${escapeHtml(p.nickname || '익명')}</td>
-      <td>${escapeHtml(p.best || '-')}</td>
-      <td style="text-align:right;">${p.moves||0}</td>
-    </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim);">등록된 기록이 없습니다</td></tr>';
+const esc = escapeHtml;
+/* 시간 표기: 밀리초 → "1분 23.456초" */
+function fmtTime(ms){
+  ms = Math.max(0, Math.round(Number(ms) || 0));
+  const m = Math.floor(ms / 60000), sec = (ms % 60000) / 1000;
+  return (m > 0 ? m + '분 ' : '') + sec.toFixed(3) + '초';
 }
-function renderAdminBoard(){
-  const list = loadRankings();
-  document.getElementById('admin-total').textContent = list.length;
-  document.getElementById('admin-top').textContent = list.length ? (list[0].best||'-') : '-';
-  const body = document.getElementById('admin-board-body');
-  const ranked = computeRanks(list).slice(0,30);
-  body.innerHTML = ranked.map(p => `
-    <tr class="${p.rank===1?'top':''}">
-      <td><span class="rank-badge">${p.rank}</span></td>
-      <td>${escapeHtml(p.nickname || '익명')}</td>
-      <td>${escapeHtml(p.best || '-')}</td>
-      <td style="text-align:right;">${p.moves||0}</td>
+function tierOf(stage){
+  let tier = TIERS[0];
+  for(const t of TIERS){ if(stage >= t.min && stage <= t.max) tier = t; }
+  return tier;
+}
+function setStats(stage, moves, ms){
+  const p = planetOf(stage);
+  $('stat-best').textContent = p.name;
+  $('stat-moves').textContent = moves + '회';
+  $('stat-time').textContent = fmtTime(ms);
+  $('result-tier').textContent = tierOf(stage).name;
+  $('fact-name').textContent = p.name + ' · ' + p.distance;
+  $('fact-desc').textContent = p.desc + ' (지름 ' + p.diameter + ')';
+  $('fact-card').style.display = '';
+}
+function resetRankUI(msg){
+  $('rankLoading').style.display = 'block';
+  $('rankLoading').textContent = msg;
+  $('rankContent').style.display = 'none';
+  $('prizeCard').style.display = 'none';
+  prizeKey = '';
+}
 
-    </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim);">등록된 기록이 없습니다</td></tr>';
+/* ---------------- 서버 통신 (Google Apps Script) ---------------- */
+function fetchJson(url, opts){
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 20000);
+  return fetch(url, Object.assign({ signal: ctl.signal }, opts)).then(r => r.json()).finally(() => clearTimeout(t));
 }
-document.getElementById('btn-submit-score').addEventListener('click', ()=>{
-  const nickInput = document.getElementById('input-nickname');
-  const nick = nickInput.value.trim() || '탐사대원';
-  const newId = addRanking(nick, bestStage, planetOf(bestStage).name, moveCount);
-  const ranked = computeRanks(loadRankings());
-  const mine = ranked.find(p => p.id === newId);
-  document.getElementById('rank-submit-msg').innerHTML = mine
-    ? `✔ 랭킹에 등록되었어요! 현재 <b>${mine.rank}위</b>예요`
-    : '✔ 랭킹에 등록되었어요!';
-  document.getElementById('rank-submit-msg').style.display = 'block';
-  document.getElementById('btn-view-ranking').style.display = 'inline-flex';
-  nickInput.disabled = true;
-  const submitBtn = document.getElementById('btn-submit-score');
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '.5';
+const GET  = p => fetchJson(SCRIPT_URL + '?' + new URLSearchParams(Object.assign({ _t: Date.now() }, p)));
+const POST = o => fetchJson(SCRIPT_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(o) });
+
+/* 게임 종료 시 자동 제출. 네트워크 오류가 나도 pendingPayload 에 남겨 두었다가 [다시 시도]로 재전송 */
+function submitResult(){
+  me = { name: userName, phone: userPhone }; lookupMode = false; prizeKey = '';
+  pendingPayload = {
+    action:'submit', name:userName, phone:userPhone,
+    stage:bestStage, moves:reachMoves, timeMs:Math.round(reachMs),
+    totalMoves:moveCount
+  };
+  sendPending();
+}
+function sendPending(){
+  if(!pendingPayload) return;
+  resetRankUI('기록을 저장하고 순위를 불러오는 중...');
+  POST(pendingPayload).then(d => { pendingPayload = null; renderStatus(d); }).catch(netErr);
+}
+function retryRank(){ if(pendingPayload) sendPending(); else { resetRankUI('순위를 불러오는 중...'); refresh(true); } }
+function showRankMsg(html){ $('rankContent').style.display = 'none'; $('rankLoading').style.display = 'block'; $('rankLoading').innerHTML = html; }
+function netErr(e){
+  console.error(e);
+  showRankMsg('⚠️ 순위 정보를 불러오지 못했습니다.<br>잠시 후 다시 시도해 주세요.' +
+    (pendingPayload ? '<br><b>※ 기록이 아직 저장되지 않았어요. 이 화면에서 꼭 다시 시도해 주세요.</b>' : '') +
+    '<br><button class="mini-btn" onclick="retryRank()">🔄 다시 시도</button>');
+}
+function refresh(manual){
+  if(!me) return;
+  GET({ action:'status', name:me.name, phone:me.phone }).then(renderStatus).catch(manual ? netErr : () => {});
+}
+
+/* 내 순위 다시 확인하기 (시작 화면) */
+$('btn-to-ranking').addEventListener('click', () => {
   playClick();
+  const id = readIdentity();
+  if(!id.name || !/^\d{4}$/.test(id.phone)){ alert('참여 때 입력한 이름과 번호 뒷 4자리를 입력해 주세요.'); return; }
+  if(!isConfigured()){ warnNotConfigured(); return; }
+  me = id; lookupMode = true; prizeKey = ''; pendingPayload = null;
+  $('result-title').textContent = 'MY RANK';
+  $('result-tier').textContent = '📊 내 순위 확인';
+  $('stat-best').textContent = '-'; $('stat-moves').textContent = '-'; $('stat-time').textContent = '-';
+  $('fact-card').style.display = 'none';
+  $('btn-retry').style.display = 'none';
+  resetRankUI('순위를 불러오는 중...');
+  showScreen('screen-result');
+  refresh(true);
 });
-document.getElementById('btn-view-ranking').addEventListener('click', ()=>{
-  playClick();
-  showScreen('screen-ranking');
-  renderRankingBoard();
-});
+
+function renderStatus(d){
+  if(!d || d.ok === false || d.error){
+    const msg = (d && d.error) || '순위를 불러오지 못했어요.';
+    if(lookupMode){ alert(msg); showScreen('screen-title'); return; }
+    showRankMsg('⚠️ ' + esc(msg));
+    return;
+  }
+  $('rankLoading').style.display = 'none'; $('rankContent').style.display = 'block';
+  if(lookupMode) setStats(d.stage, d.moves, d.timeMs);
+  $('myRank').innerHTML = `나의 현재 순위: ${d.rank}위 (총 ${d.total}명)` +
+    `<small>내 최고 기록: ${esc(d.best)} · ${d.moves}회 · ${fmtTime(d.timeMs)}</small>`;
+  const medals = ['🥇','🥈','🥉'], w = $('top3List'); w.innerHTML = '';
+  (d.top3 || []).forEach((r,i) => {
+    const div = document.createElement('div'); div.className = 'leader-row';
+    div.innerHTML = `<span><span class="medal">${medals[i]}</span>${esc(r.name)}</span>` +
+      `<span class="leader-meta">${esc(r.best)}<br>${r.moves}회 · ${fmtTime(r.timeMs)}</span>`;
+    w.appendChild(div);
+  });
+  $('rankNote').innerHTML = d.closed ? '🏁 운영이 종료되어 순위가 확정되었어요.' :
+    '※ 다른 참가자가 참여할 때마다 순위가 바뀔 수 있어요.<br>순위는 ①도달 천체 ②이동 횟수 ③걸린 시간 ④먼저 기록한 순서로 정해져요.<br>이 화면은 30초마다 자동 갱신돼요. (' + new Date().toLocaleTimeString('ko-KR') + ' 기준)';
+  renderPrize(d);
+  clearInterval(pollT); if(!d.closed) pollT = setInterval(() => refresh(false), 30000);
+}
+
+/* ---------------- 1위 상품 / 배송 정보 (goldenbell과 동일 절차) ---------------- */
+function renderPrize(d){
+  const fk = 'pm_first_' + me.name + '_' + me.phone, first = d.rank === 1;
+  const st = first ? (d.claimed ? 'claimed' : 'open') : (LS.get(fk) ? 'lost' : 'wait');
+  if(first) LS.set(fk, '1');
+  const t1 = (d.top3 || [])[0], key = st + d.closed + (st === 'wait' && t1 ? t1.stage + '/' + t1.moves + '/' + t1.timeMs : '');
+  if(key === prizeKey) return;           // 입력 중인 폼이 자동 갱신으로 지워지지 않도록
+  prizeKey = key; const c = $('prizeCard'); c.style.display = 'block';
+  const head = `<h3>🎁 1위 상품: ${PRIZE_NAME}</h3>`;
+  if(st === 'open') c.innerHTML = head + `<p>지금 <b>1위</b>예요! 🥇 상품을 집으로 보내드리려면 <b>배송 정보</b>가 필요해요. 1위가 아닌 분께는 주소·연락처를 받지 않아요.</p>
+    <p class="warn">⚠️ 순위는 계속 바뀔 수 있어요. ${d.closed ? '' : '운영 종료 시점의 1위께만 발송돼요. 1위 자리를 내주면 입력하신 정보는 <b>자동으로 삭제</b>돼요. 이 화면에서 순위를 계속 확인해 주세요.'}</p>` + claimForm();
+  else if(st === 'claimed') c.innerHTML = head + `<p class="ok">✅ 현재 1위이며 배송 정보가 등록되어 있어요.<br>${d.closed ? '🎉 최종 1위 확정! 입력하신 연락처로 안내드릴게요.' : '끝까지 1위를 지키면 발송돼요. 1위를 내주면 정보는 자동 삭제돼요.'}</p>
+    ${d.closed ? '' : '<div style="text-align:center;"><button class="mini-btn" onclick="showForm()">✏️ 정보 다시 입력하기</button></div><div id="reform"></div>'}`;
+  else if(st === 'lost') c.innerHTML = head + `<p class="warn">😢 아쉽게도 1위 자리를 다른 참가자에게 내주었어요.<br>입력하신 배송 정보는 <b>자동으로 삭제</b>돼요.</p>`;
+  else c.innerHTML = head + `<p>1위가 되면 이 자리에 <b>배송 정보 입력창</b>이 열려요.${t1 ? `<br>현재 1위 기록: <b>${esc(t1.best)} / ${t1.moves}회 / ${fmtTime(t1.timeMs)}</b>` : ''}</p>
+    <p class="warn">수령 주소·연락처는 1위에게만, 개인정보 동의 후에 받아요.</p>`;
+}
+function showForm(){ $('reform').innerHTML = claimForm(); }
+
+function claimForm(){
+  const imText = USE_TOUCH_KEYBOARD ? ' inputmode="none"' : '';
+  const imTel  = USE_TOUCH_KEYBOARD ? ' inputmode="none"' : ' inputmode="numeric"';
+  return `<div class="pf">
+  <label>받는 분 이름<input class="arcade-input" type="text" id="cName" maxlength="20" autocomplete="off" data-kb data-kb-title="받는 분 이름 입력"${imText}></label>
+  <label>휴대전화 번호(숫자만)<input class="arcade-input" type="tel" id="cTel" maxlength="13" placeholder="01012345678" autocomplete="off" data-kb data-kb-title="휴대전화 번호 입력"${imTel}></label>
+  <label>주소 (동·호수까지 자세히 적어 주세요)<input class="arcade-input" type="text" id="cAddr" maxlength="150" placeholder="예) 인천시 ○○구 ○○로 12, 101동 1203호" autocomplete="off" data-kb data-kb-title="주소 입력"${imText}></label>
+  <details><summary>개인정보 수집·이용 안내 (펼쳐서 확인)</summary>
+    · 수집 주체: 부천천문과학관<br>· 수집 항목: 받는 분 이름, 연락처, 주소(동·호수 포함)<br>· 이용 목적: 1위 상품 배송 및 당첨 안내<br>
+    · 보유 기간: 상품 발송 후 30일 이내 파기<br>
+    · 동의를 거부할 수 있으며, 거부 시 상품 발송이 어렵습니다.<br>· 상품은 국내 배송만 가능합니다.<br>· 주소나 연락처가 정확하지 않은 경우 배송이 불가합니다.<br>· 잘못된 정보로 인한 미발송 또는 오발송에 대해서는 책임지기 어려우니, 제출 전 한 번 더 확인 부탁드립니다.</details>
+  <label class="chk"><input type="checkbox" id="cConsent"> [필수] 위 개인정보 수집·이용에 동의합니다.</label>
+  <label class="chk"><input type="checkbox" id="cAge"> [필수] 만 14세 이상이거나, 만 14세 미만인 경우 법정대리인의 동의를 받았습니다.</label>
+  <button class="launch-btn" onclick="sendClaim()">📦 배송 정보 제출</button></div>`;
+}
+
+function sendClaim(){
+  const g = id => $(id).value.trim(), tel = g('cTel').replace(/-/g,'');
+  if(!g('cName') || g('cAddr').length < 8) return alert('받는 분 이름과 주소(동·호수까지)를 자세히 입력해 주세요.');
+  if(!/^01\d{8,9}$/.test(tel)) return alert('연락처를 010, 011로 시작되는 휴대폰 번호 형식으로 입력해 주세요.');
+  if(!$('cConsent').checked || !$('cAge').checked) return alert('필수 동의 항목에 체크해 주세요.');
+  POST({ action:'claim', name:me.name, phone:me.phone, receiver:g('cName'), tel, addr:g('cAddr'), consent:true, age:true })
+   .then(r => {
+     if(!r.ok) return alert(r.error || '제출에 실패했어요.');
+     alert('✅ 등록되었어요! 1위를 지키면 발송해 드려요.');
+     if(window.closeTouchKeyboard) window.closeTouchKeyboard();
+     prizeKey = ''; refresh(true);
+   })
+   .catch(() => alert('네트워크 오류가 발생했어요. 다시 시도해 주세요.'));
+}
 
 function buildChainPreview(){
   const wrap = document.getElementById('chain-preview');
@@ -803,7 +947,7 @@ function buildChainPreview(){
 }
 
 /* ============== 터치스크린 화면 키보드 (Space War 2095와 동일 형식) ============== */
-// 물리 키보드가 없는 터치 전용 화면에서도 닉네임/관리자 비밀번호를 입력할 수 있도록,
+// 물리 키보드가 없는 터치 전용 화면에서도 이름/번호/배송정보를 입력할 수 있도록,
 // 화면 하단에서 올라오는 자체 키보드를 제공합니다.
 (function setupTouchKeyboard(){
   const KB_ROWS_EN = [
@@ -881,18 +1025,17 @@ function buildChainPreview(){
 
   let activeInput = null;
   const kbTitleEl = document.getElementById('touchKbTitle');
-  const KB_TITLES = {
-    'input-nickname': '닉네임 입력',
-    'input-adminpass': '관리자 비밀번호 입력'
-  };
 
   function openTouchKeyboard(inputEl){
     activeInput = inputEl;
-    if (kbTitleEl) kbTitleEl.textContent = KB_TITLES[inputEl.id] || '입력';
+    if (kbTitleEl) kbTitleEl.textContent = inputEl.dataset.kbTitle || '입력';
     kb.classList.add('show');
+    document.body.classList.add('kb-open');   // 키보드에 가려지지 않도록 화면 아래 여백 확보
+    setTimeout(() => { try { inputEl.scrollIntoView({ block:'center', behavior:'smooth' }); } catch(e){} }, 260);
   }
   window.closeTouchKeyboard = function(){
     kb.classList.remove('show');
+    document.body.classList.remove('kb-open');
     activeInput = null;
   };
 
@@ -1042,45 +1185,21 @@ function buildChainPreview(){
     window.closeTouchKeyboard();
   });
 
-  // 닉네임 입력칸 + 관리자 비밀번호 입력칸에 키보드 연결
-  ['input-nickname', 'input-adminpass'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.setAttribute('inputmode', 'none'); // 기본 OS 키보드 대신 커스텀 키보드 사용
-    el.setAttribute('autocomplete', 'off');
-    el.addEventListener('focus', () => openTouchKeyboard(el));
-    el.addEventListener('pointerdown', () => openTouchKeyboard(el));
-  });
+  // 이름·번호 입력칸 + 1위 배송정보 입력칸(data-kb 속성)에 키보드 연결
+  if (USE_TOUCH_KEYBOARD){
+    ['input-name', 'input-phone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('inputmode', 'none'); // 기본 OS 키보드 대신 커스텀 키보드 사용
+    });
+    document.addEventListener('focusin', e => {
+      if (e.target.matches && e.target.matches('input[data-kb]')) openTouchKeyboard(e.target);
+    });
+    document.addEventListener('pointerdown', e => {
+      const el = e.target.closest ? e.target.closest('input[data-kb]') : null;
+      if (el) openTouchKeyboard(el);
+    });
+  }
 })();
-
-/* ============== idle timeout : 1분 무입력 시 자동 종료 + 랭킹 익명 등록 + 허브로 복귀 ============== */
-const IDLE_TIMEOUT_MS = 60000;
-let idleTimer = null;
-function notifyParentGoHome(){
-  try {
-    if (window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: 'go-home' }, '*');
-      return;
-    }
-  } catch(e) {}
-  showScreen('screen-title');
-}
-function resetIdleTimer(){
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(()=>{
-    const activeId = document.querySelector('.screen.active').id;
-    if(activeId === 'screen-game' && !gameOver){
-      inputLocked = true;
-      finishGame();
-      addRanking('익명', bestStage, planetOf(bestStage).name, moveCount);
-    }
-    notifyParentGoHome();
-  }, IDLE_TIMEOUT_MS);
-}
-['pointerdown','touchstart'].forEach(evt=>{
-  document.addEventListener(evt, resetIdleTimer, {passive:true});
-});
-resetIdleTimer();
 
 /* ============== 게임 상태 ============== */
 const GRID = 4;
@@ -1093,6 +1212,10 @@ let moveCount = 0;
 let gameOver = false;
 let sunReached = false;
 let inputLocked = false;
+/* 순위 기록용: '현재 최고 천체에 처음 도달한 시점'의 이동 횟수 / 경과 시간(ms) */
+let reachMoves = 0;
+let reachMs = 0;
+let gameStartAt = 0;
 
 function emptyBoard(){
   return Array.from({length:GRID}, ()=>Array(GRID).fill(null));
@@ -1101,15 +1224,16 @@ function emptyBoard(){
 function startGame(){
   board = emptyBoard();
   score = 0; bestStage = 1; moveCount = 0; gameOver = false; sunReached = false; inputLocked = false;
+  reachMoves = 0; reachMs = 0;
   document.getElementById('tile-layer').innerHTML = '';
   document.getElementById('hud-moves').textContent = '0';
   document.getElementById('hud-best').textContent = '수성';
-  document.getElementById('softcap-banner').classList.remove('show');
   tileEls = {};
   spawnRandomTile();
   spawnRandomTile();
   showScreen('screen-game');
   renderBoard(true);
+  gameStartAt = performance.now();   // 시간 측정 시작 (보드가 보이는 시점)
 }
 
 function randomEmptyCell(){
@@ -1203,6 +1327,7 @@ function getLine(dir, i){
 function move(dir){
   if(inputLocked || gameOver) return;
   const prev = cloneBoard();
+  const prevBest = bestStage;
   let merged = false;
   let mergedTileIds = [];
 
@@ -1235,6 +1360,10 @@ function move(dir){
 
   if(!boardsEqual(prev, board)){
     moveCount++;
+    if(bestStage > prevBest){            // 새 최고 천체 도달 → 그 순간의 이동 횟수/시간(ms) 저장
+      reachMoves = moveCount;
+      reachMs = performance.now() - gameStartAt;
+    }
     document.getElementById('hud-moves').textContent = String(moveCount);
     document.getElementById('hud-best').textContent = planetOf(bestStage).name;
     spawnRandomTile();
@@ -1248,7 +1377,6 @@ function move(dir){
     } else {
       playSlide();
     }
-    checkSoftCap();
     if(sunReached){
       inputLocked = true;
       setTimeout(()=> finishGame(), 900);
@@ -1273,14 +1401,6 @@ function hasAnyMove(){
   return false;
 }
 
-function checkSoftCap(){
-  const banner = document.getElementById('softcap-banner');
-  if(moveCount === 80){
-    banner.classList.add('show');
-    setTimeout(()=> banner.classList.remove('show'), 3500);
-  }
-}
-
 /* ---------- 입력: 스와이프 + 방향 버튼 ---------- */
 const boardEl = document.getElementById('board');
 let touchStartX=0, touchStartY=0, touchActive=false;
@@ -1303,10 +1423,9 @@ boardEl.addEventListener('touchend', (e)=>{
   else { move(dy > 0 ? 'down' : 'up'); }
 }, {passive:true});
 
-document.getElementById('pad-up').addEventListener('click', ()=> move('up'));
-document.getElementById('pad-down').addEventListener('click', ()=> move('down'));
-document.getElementById('pad-left').addEventListener('click', ()=> move('left'));
-document.getElementById('pad-right').addEventListener('click', ()=> move('right'));
+[['pad-up','up'],['pad-down','down'],['pad-left','left'],['pad-right','right']].forEach(([id,dir])=>{
+  document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); move(dir); });
+});
 
 document.addEventListener('keydown', (e)=>{
   if(document.getElementById('screen-game').classList.contains('active')){
@@ -1317,7 +1436,12 @@ document.addEventListener('keydown', (e)=>{
   }
 });
 
-window.addEventListener('resize', ()=>{ if(document.getElementById('screen-game').classList.contains('active')) renderBoard(false); });
+function relayoutBoard(){
+  if(document.getElementById('screen-game').classList.contains('active') && board.length) renderBoard(false);
+}
+window.addEventListener('resize', relayoutBoard);
+window.addEventListener('orientationchange', ()=> setTimeout(relayoutBoard, 200));
+if(window.ResizeObserver) new ResizeObserver(relayoutBoard).observe(document.getElementById('board'));
 
 /* ============== 결과 화면 ============== */
 const TIERS = [
@@ -1328,30 +1452,21 @@ const TIERS = [
   { min:9, max:9, name:'항성 창조자 ☀️' },
 ];
 function finishGame(){
+  if(gameOver) return;               // 태양 도달 타이머 + 종료 버튼이 겹쳐도 한 번만 처리
   gameOver = true;
-  const p = planetOf(bestStage);
-  document.getElementById('stat-best').textContent = p.name;
-  document.getElementById('stat-moves').textContent = moveCount;
-
-  let tier = TIERS[0];
-  for(const t of TIERS){ if(bestStage >= t.min && bestStage <= t.max) tier = t; }
-  document.getElementById('result-tier').textContent = tier.name;
-
-  document.getElementById('fact-name').textContent = p.name + ' · ' + p.distance;
-  document.getElementById('fact-desc').textContent = p.desc + ' (지름 ' + p.diameter + ')';
-
-  // 새 결과가 나올 때마다 닉네임 등록 칸을 다시 입력 가능한 상태로 초기화
-  const nickInput = document.getElementById('input-nickname');
-  nickInput.value = '';
-  nickInput.disabled = false;
-  const submitBtn = document.getElementById('btn-submit-score');
-  submitBtn.disabled = false;
-  submitBtn.style.opacity = '';
-  document.getElementById('rank-submit-msg').style.display = 'none';
-  document.getElementById('btn-view-ranking').style.display = 'none';
-
+  if(bestStage === 1){               // 한 번도 합치지 못한 경우: 종료 시점 값 사용
+    reachMoves = moveCount;
+    reachMs = performance.now() - gameStartAt;
+  }
+  lookupMode = false;
+  setStats(bestStage, reachMoves, Math.round(reachMs));
+  $('result-title').textContent = 'RESULT';
+  $('btn-retry').style.display = canRetry() ? '' : 'none';
+  markParticipated();
   playResultSound();
   showScreen('screen-result');
+  resetRankUI('기록을 저장하고 순위를 불러오는 중...');
+  submitResult();
 }
 
 /* ============== 사운드 (Web Audio API) ============== */
