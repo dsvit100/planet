@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<title>행성 수박게임 | 부천천문과학관</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;800&family=Gowun+Dodum&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep-space:#090C1F;
+    --panel-navy:#131A3D;
+    --panel-navy-2:#1B2350;
+    --starlight:#F5C86B;
+    --aurora:#4FD8C4;
+    --nebula:#8A73D1;
+    --text-main:#ECEDF6;
+    --text-dim:#B7C0E8;
+    --flare:#FF6B81;
+    --leaf:#6BE6A6;
+    --grid-line:rgba(183,192,232,.4);
+  }
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:#000;
+    color:var(--text-main);
+    font-family:'Gowun Dodum', sans-serif;
+    overflow:hidden;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+    touch-action:manipulation;
+    -webkit-user-select:none;user-select:none;
+  }
+  button{
+    -webkit-touch-callout:none;-webkit-user-drag:none;
+    -webkit-user-select:none;user-select:none;
+    font-family:inherit;
+  }
+  #frame-outer{
+    height:100vh;width:100vw;
+    display:flex;align-items:center;justify-content:center;
+    background:#000;
+  }
+  #frame{
+    position:relative;
+    background:var(--deep-space);
+    aspect-ratio:16/9;
+    width:100%;
+    max-height:100%;
+    max-width:calc(100vh * 16 / 9);
+    overflow:hidden;
+    touch-action:none;
+  }
+  #starfield{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;}
+  #app{position:relative;z-index:1;height:100%;width:100%;}
+  .screen{
+    display:none;
+    position:absolute;inset:0;
+    flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    animation:fadein .4s ease;
+    padding:28px;
+  }
+  .screen.active{display:flex;}
+  @keyframes fadein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    letter-spacing:.35em;font-size:13px;color:var(--aurora);
+    margin-bottom:16px;font-weight:500;
+  }
+  h1.title{
+    font-family:'Gothic A1', sans-serif;font-weight:800;
+    font-size:clamp(28px,5.5vw,46px);line-height:1.35;margin:0 0 14px;
+  }
+  p.lead{font-size:16.5px;color:var(--text-dim);line-height:1.8;margin:0 0 30px;max-width:520px;}
+  .launch-btn{
+    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:19px;
+    background:var(--starlight);color:#241705;border:none;
+    padding:16px 46px;border-radius:999px;cursor:pointer;
+    letter-spacing:.05em;transition:transform .15s ease;
+  }
+  .launch-btn:active{transform:scale(.96);}
+  .ghost-btn{
+    font-size:15px;background:transparent;color:var(--text-dim);
+    border:1.5px solid rgba(183,192,232,.55);padding:13px 30px;
+    border-radius:999px;cursor:pointer;margin-top:16px;
+  }
+  .ghost-btn:active{border-color:var(--aurora);color:var(--aurora);}
+
+  /* 화면 상단 뒤로가기 바 (게임 플레이 화면 제외 전 화면 공통) */
+  .topbar{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;max-width:520px;}
+  .link-back{
+    font-size:15px;color:var(--text-dim);cursor:pointer;letter-spacing:.02em;
+    padding:6px 8px;border-radius:8px;
+  }
+  .link-back:active{color:var(--aurora);background:rgba(79,216,196,.1);}
+
+  /* 게임 플레이 화면 우측 상단 게임 종료 버튼 */
+  #btn-quit-game{
+    position:absolute;top:14px;right:16px;z-index:15;
+    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:12.5px;
+    background:rgba(19,26,61,.9);color:var(--flare);
+    border:1px solid var(--flare);border-radius:999px;
+    padding:9px 16px;cursor:pointer;letter-spacing:.02em;
+  }
+  #btn-quit-game:active{background:rgba(255,107,129,.18);}
+
+  /* 진화 체인 미리보기 */
+  #chain-preview{
+    display:flex;align-items:flex-start;gap:4px;margin-bottom:24px;flex-wrap:wrap;justify-content:center;max-width:600px;
+  }
+  .chain-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .chain-dot{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    box-shadow:0 0 6px rgba(255,255,255,.15);
+  }
+  .chain-name{font-size:11.5px;font-weight:600;color:var(--text-dim);white-space:nowrap;}
+  .chain-arrow{color:var(--text-dim);font-size:14px;margin-top:11px;}
+
+  /* 설명 화면 */
+  #screen-howto .rules{
+    text-align:left;max-width:480px;margin:0 0 26px;
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .rule-row{
+    display:flex;align-items:flex-start;gap:14px;
+    background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);
+    border-radius:14px;padding:13px 18px;
+  }
+  .rule-num{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--aurora);
+    font-size:14px;flex-shrink:0;width:22px;height:22px;border-radius:50%;
+    border:1px solid var(--aurora);display:flex;align-items:center;justify-content:center;
+  }
+  .rule-text{font-size:15px;color:var(--text-main);line-height:1.6;}
+
+  /* 게임 화면 */
+  #screen-game{padding:14px;justify-content:flex-start;}
+  #hud{
+    width:100%;max-width:520px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 6px 14px;
+  }
+  .hud-block{display:flex;flex-direction:column;align-items:flex-start;}
+  .hud-block.right{align-items:flex-end;}
+  .hud-label{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--text-dim);}
+  .hud-value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--text-main);}
+
+  #board-wrap{
+    position:relative;
+    width:min(78vh, 92vw, 480px);
+    max-width:100%;
+  }
+  #board{
+    position:relative;
+    width:100%;aspect-ratio:1/1;
+    background:var(--panel-navy);
+    border-radius:16px;
+    padding:8px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    grid-template-rows:repeat(4,1fr);
+    gap:8px;
+    touch-action:none;
+  }
+  .cell-bg{
+    background:rgba(183,192,232,.12);
+    border-radius:10px;
+  }
+  #tile-layer{position:absolute;inset:8px;}
+  .tile{
+    position:absolute;
+    display:flex;align-items:flex-end;justify-content:center;
+    padding-bottom:9%;
+    border-radius:10px;
+    overflow:hidden;
+    transition:left .13s ease, top .13s ease, transform .12s ease;
+    box-shadow:0 2px 10px rgba(0,0,0,.35);
+  }
+  /* 행성별 무늬 레이어: 배경색(el.style.backgroundColor) 위에 겹쳐서 형태로 구분되게 함 */
+  .tile::before{
+    content:'';
+    position:absolute;inset:0;
+    border-radius:inherit;
+    pointer-events:none;
+    z-index:0;
+  }
+  /* 수성: 촘촘한 크레이터 점무늬 */
+  .planet-mercury::before{
+    background-image:
+      radial-gradient(circle at 22% 30%, rgba(0,0,0,.28) 0 6%, transparent 7%),
+      radial-gradient(circle at 62% 18%, rgba(0,0,0,.22) 0 5%, transparent 6%),
+      radial-gradient(circle at 78% 55%, rgba(0,0,0,.26) 0 7%, transparent 8%),
+      radial-gradient(circle at 38% 68%, rgba(0,0,0,.22) 0 5%, transparent 6%),
+      radial-gradient(circle at 15% 78%, rgba(0,0,0,.2) 0 4%, transparent 5%),
+      radial-gradient(circle at 88% 82%, rgba(0,0,0,.2) 0 4%, transparent 5%);
+  }
+  /* 금성: 매끈하게 흐르는 구름 띠 (점무늬 없이 부드러운 대각선 웨이브) */
+  .planet-venus::before{
+    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.32) 0 5%, transparent 5% 20%);
+  }
+  /* 지구: 파란 바다 위 초록 대륙 덩어리 */
+  .planet-earth::before{
+    background-image:
+      radial-gradient(ellipse 34% 22% at 30% 34%, rgba(74,168,94,.85) 0 100%, transparent 100%),
+      radial-gradient(ellipse 26% 18% at 72% 60%, rgba(74,168,94,.8) 0 100%, transparent 100%),
+      radial-gradient(ellipse 18% 14% at 55% 22%, rgba(74,168,94,.75) 0 100%, transparent 100%);
+  }
+  /* 화성: 듬성듬성 암석 얼룩 + 극관 */
+  .planet-mars::before{
+    background-image:
+      radial-gradient(circle at 30% 25%, rgba(0,0,0,.18) 0 10%, transparent 11%),
+      radial-gradient(circle at 68% 60%, rgba(0,0,0,.16) 0 12%, transparent 13%),
+      radial-gradient(circle at 20% 82%, rgba(255,255,255,.35) 0 8%, transparent 9%);
+  }
+  /* 목성: 굵은 가로 줄무늬 (여러 겹) */
+  .planet-jupiter::before{
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 10%, rgba(255,255,255,.14) 10% 20%);
+  }
+  /* 토성: 가운데를 가로지르는 얇은 고리 띠 (목성과 구분되도록 줄 1~2개만) */
+  .planet-saturn::before{
+    background-image: linear-gradient(0deg, transparent 0 42%, rgba(255,255,255,.55) 42% 44%, rgba(255,255,255,.85) 44% 52%, rgba(255,255,255,.55) 52% 54%, transparent 54% 100%);
+  }
+  /* 천왕성: 옅은 대각선 실선 (금성보다 선이 가늘고 성기게) */
+  .planet-uranus::before{
+    background-image: repeating-linear-gradient(70deg, rgba(255,255,255,.4) 0 3%, transparent 3% 22%);
+  }
+  /* 해왕성: 바람이 부는 듯한 대각선 소용돌이 줄 (천왕성과 반대 각도, 더 진하고 굵게) */
+  .planet-neptune::before{
+    background-image: repeating-linear-gradient(-55deg, rgba(255,255,255,.28) 0 6%, transparent 6% 26%);
+  }
+  /* 태양: 중심에서 뻗어나가는 빛줄기 */
+  .planet-sun::before{
+    background-image: conic-gradient(from 0deg, rgba(255,255,255,.4) 0 4%, transparent 4% 12%, rgba(255,255,255,.35) 12% 16%, transparent 16% 24%, rgba(255,255,255,.4) 24% 28%, transparent 28% 36%, rgba(255,255,255,.35) 36% 40%, transparent 40% 48%, rgba(255,255,255,.4) 48% 52%, transparent 52% 60%, rgba(255,255,255,.35) 60% 64%, transparent 64% 72%, rgba(255,255,255,.4) 72% 76%, transparent 76% 84%, rgba(255,255,255,.35) 84% 88%, transparent 88% 96%, rgba(255,255,255,.4) 96% 100%);
+  }
+  .tile .p-name{
+    position:relative;z-index:1;
+    font-family:'Gothic A1',sans-serif;font-weight:800;
+    color:#fff;
+    background:rgba(9,12,31,.6);
+    padding:2px 9px;
+    border-radius:999px;
+    letter-spacing:.01em;
+    white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  .tile.spawn{animation:tilein .16s ease;}
+  @keyframes tilein{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .tile.merged{animation:tilemerge .22s ease;}
+  @keyframes tilemerge{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
+  .tile.sun{box-shadow:0 0 26px 8px rgba(245,200,107,.75);}
+
+  #softcap-banner{
+    position:absolute;top:64px;left:50%;transform:translateX(-50%);
+    font-family:'Gowun Dodum',sans-serif;font-size:13px;
+    background:rgba(19,26,61,.9);border:1px solid rgba(79,216,196,.4);
+    color:var(--aurora);padding:8px 16px;border-radius:999px;
+    opacity:0;transition:opacity .4s ease;pointer-events:none;z-index:10;
+  }
+  #softcap-banner.show{opacity:1;}
+
+  /* 방향 패드 (크게, 간격도 넉넉하게 — 화면 높이에 비례해서 작은 해상도에서도 잘리지 않도록 함) */
+  #dpad{
+    margin-top:clamp(10px, 3vh, 26px);
+    display:grid;
+    grid-template-columns:repeat(3, clamp(60px, 8.5vh, 100px));
+    grid-template-rows:repeat(2, clamp(60px, 8.5vh, 100px));
+    gap:clamp(8px, 1.6vh, 20px);
+  }
+  .pad-btn{
+    background:var(--panel-navy);border:1.5px solid rgba(183,192,232,.45);
+    color:var(--text-main);border-radius:16px;font-size:clamp(22px, 3.2vh, 38px);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    touch-action:none;
+  }
+  .pad-btn:active{background:var(--panel-navy-2);border-color:var(--aurora);}
+  #pad-up{grid-column:2;grid-row:1;}
+  #pad-left{grid-column:1;grid-row:2;}
+  #pad-down{grid-column:2;grid-row:2;}
+  #pad-right{grid-column:3;grid-row:2;}
+
+  /* 결과 화면 */
+  .result-title{font-family:'Space Grotesk',sans-serif;font-size:13px;letter-spacing:.3em;color:var(--text-dim);margin-bottom:10px;}
+  #result-tier{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:clamp(22px,4vw,30px);color:var(--starlight);margin:0 0 20px;}
+  #stat-row{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;justify-content:center;}
+  .stat-card{background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);border-radius:14px;padding:14px 20px;min-width:96px;}
+  .stat-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--text-main);}
+  .stat-lbl{font-size:11px;color:var(--text-dim);letter-spacing:.1em;margin-top:2px;}
+  #fact-card{
+    background:var(--panel-navy-2);border:1px solid rgba(79,216,196,.3);
+    border-radius:16px;padding:16px 20px;max-width:440px;margin-bottom:22px;text-align:left;
+  }
+  #fact-card .fact-label{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;color:var(--aurora);margin-bottom:8px;}
+  #fact-card .fact-name{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;}
+  #fact-card .fact-desc{font-size:13px;color:var(--text-dim);line-height:1.7;}
+  .result-btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+
+  #sound-toggle{
+    position:absolute;bottom:16px;right:16px;z-index:20;
+    width:42px;height:42px;border-radius:50%;
+    background:rgba(19,26,61,.85);border:1.5px solid rgba(183,192,232,.5);
+    color:var(--text-main);font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #sound-toggle.muted{opacity:.5;}
+
+  /* ===== 랭킹 / 닉네임 등록 ===== */
+  .field-panel{
+    width:100%;max-width:440px;background:var(--panel-navy);
+    border:1px solid rgba(183,192,232,.35);border-radius:16px;
+    padding:16px 20px;margin-bottom:16px;text-align:left;
+  }
+  .field-panel .field-label{display:block;font-size:12px;color:var(--text-dim);letter-spacing:.05em;margin-bottom:10px;}
+  input.arcade-input{
+    width:100%;padding:13px 12px;background:var(--deep-space);border:2px solid rgba(183,192,232,.5);
+    color:var(--text-main);font-family:'Gothic A1',sans-serif;font-weight:700;font-size:14px;
+    border-radius:8px;outline:none;letter-spacing:.02em;
+  }
+  input.arcade-input:focus{border-color:var(--aurora);}
+  #rank-submit-msg{font-size:13px;color:var(--leaf);margin-top:10px;text-align:center;display:none;}
+  .row{display:flex;gap:10px;width:100%;margin-top:14px;}
+  .row .launch-btn, .row .ghost-btn{flex:1;margin-top:0;padding-left:16px;padding-right:16px;text-align:center;}
+
+  table.board{width:100%;max-width:520px;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  table.board th{color:var(--text-dim);font-size:10.5px;text-align:left;padding:8px 6px;border-bottom:1px solid var(--grid-line);letter-spacing:.05em;}
+  table.board td{padding:9px 6px;border-bottom:1px solid rgba(183,192,232,.2);color:var(--text-main);text-align:left;}
+  table.board tr.top td{color:var(--starlight);}
+  .rank-badge{display:inline-block;width:20px;color:var(--aurora);font-weight:700;}
+
+  /* 랭킹 보기 버튼: 시작하기 버튼과 완전히 동일한 크기, 색상만 구분 */
+  .rank-btn{
+    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:15px;
+    background:linear-gradient(135deg, var(--starlight), #ffb454);
+    color:#241705;border:none;
+    padding:12px 32px;border-radius:999px;cursor:pointer;
+    letter-spacing:.05em;margin-top:16px;transition:transform .15s ease;
+  }
+  .rank-btn:active{transform:scale(.96);}
+
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;letter-spacing:.05em;
+    padding:6px 12px;border:1px solid var(--grid-line);border-radius:20px;color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .status-dot{width:7px;height:7px;border-radius:50%;background:#555;}
+  .status-dot.on{background:var(--leaf);box-shadow:0 0 6px var(--leaf);}
+  .admin-link{font-size:10.5px;color:var(--text-dim);opacity:.8;letter-spacing:.05em;cursor:pointer;margin-top:14px;}
+  .admin-link:active{opacity:1;color:var(--flare);}
+
+  .admin-warn-box{
+    width:100%;max-width:480px;background:rgba(255,107,129,.08);
+    border:1px solid var(--flare);border-radius:14px;
+    padding:18px 18px 16px;margin-bottom:20px;text-align:center;
+  }
+  .admin-warn-box .eyebrow{color:var(--flare);margin-bottom:8px;}
+  .admin-warn-box h1{margin:0;font-size:20px;}
+  #admin-error{font-size:11.5px;color:var(--flare);margin-top:12px;display:none;}
+
+  .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px;margin-top:14px;margin-bottom:14px;}
+  .stat-box{background:var(--panel-navy);border:1px solid var(--grid-line);padding:14px 10px;text-align:center;border-radius:10px;}
+  .stat-box .v{font-size:20px;color:var(--aurora);font-family:'Gothic A1',sans-serif;font-weight:800;}
+  .stat-box .l{font-size:10.5px;color:var(--text-dim);margin-top:6px;letter-spacing:.03em;}
+
+  /* ===== 터치스크린 화면 키보드 (Space War 2095와 동일 형식, 색상만 이 게임 톤에 맞춤) ===== */
+  .touch-kb{
+    position:fixed;left:0;right:0;bottom:0;z-index:200;
+    background:linear-gradient(180deg, var(--panel-navy), var(--deep-space) 60%);
+    border-top:2px solid var(--aurora);
+    box-shadow:0 -8px 30px rgba(0,0,0,.6), 0 -2px 20px rgba(79,216,196,.15);
+    padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));
+    transform:translateY(110%);
+    transition:transform .22s ease;
+  }
+  .touch-kb.show{transform:translateY(0);}
+  .touch-kb-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
+  .touch-kb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+  .touch-kb-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:12px;color:var(--text-dim);letter-spacing:.05em;}
+  .touch-kb-done{
+    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;
+    background:var(--panel-navy-2);border:2px solid var(--leaf);
+    color:var(--leaf);border-radius:8px;padding:8px 14px;cursor:pointer;
+  }
+  .touch-kb-done:active{transform:scale(.96);}
+  .touch-kb-head-right{display:flex;align-items:center;gap:8px;}
+  .touch-kb-lang{
+    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;
+    background:var(--panel-navy-2);border:2px solid var(--starlight);
+    color:var(--starlight);border-radius:8px;padding:8px 12px;cursor:pointer;
+    min-width:56px;text-align:center;
+  }
+  .touch-kb-lang:active{transform:scale(.96);background:rgba(245,200,107,.2);}
+  .touch-kb-row{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;}
+  .touch-kb-key{
+    flex:1;min-width:0;height:46px;
+    font-family:'Gothic A1',sans-serif;font-weight:700;font-size:15px;
+    background:var(--panel-navy-2);
+    border:2px solid var(--aurora);color:var(--aurora);
+    border-radius:8px;cursor:pointer;user-select:none;touch-action:manipulation;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .touch-kb-key:active{background:rgba(79,216,196,.22);transform:scale(.95);}
+  .touch-kb-bottom{margin-top:2px;}
+  .touch-kb-space{flex:5;font-size:13px;letter-spacing:.1em;}
+  .touch-kb-wide{flex:2;font-size:13px;}
+  .touch-kb-back{border-color:var(--flare);color:var(--flare);}
+  .touch-kb-back:active{background:rgba(255,107,129,.22);}
+  .touch-kb-shift{border-color:var(--starlight);color:var(--starlight);}
+  .touch-kb-shift.on{background:rgba(245,200,107,.25);box-shadow:0 0 10px rgba(245,200,107,.5);}
+  .touch-kb-shift:active{background:rgba(245,200,107,.22);}
+  @media (max-width:640px){
+    .touch-kb-key{height:40px;font-size:14px;}
+    .touch-kb-lang{padding:7px 10px;font-size:12px;min-width:48px;}
+  }
+</style>
+</head>
+<body>
+<div id="frame-outer">
+  <div id="frame">
+    <canvas id="starfield"></canvas>
+    <div id="app">
+
+      <div class="screen active" id="screen-title">
+        <div class="eyebrow">PLANET MERGE · 우주 미니게임</div>
+        <h1 class="title">행성 수박게임</h1>
+        <p class="lead">같은 행성을 합쳐서<br>태양까지 만들어보세요!</p>
+        <button class="launch-btn" id="btn-to-howto">시작하기</button>
+        <button class="rank-btn" id="btn-to-ranking">🏆 랭킹 보기</button>
+      </div>
+
+      <div class="screen" id="screen-howto">
+        <div class="topbar"><span class="link-back" id="back-from-howto">← 뒤로</span></div>
+        <div class="eyebrow">HOW TO PLAY</div>
+        <h1 class="title" style="font-size:clamp(21px,4vw,28px);margin-bottom:20px;">이렇게 플레이하세요</h1>
+        <div class="rules">
+          <div class="rule-row"><div class="rule-num">1</div><div class="rule-text">손가락으로 화면을 <b>상하좌우로 스와이프</b>하면 보드 위 모든 행성이 그 방향 끝까지 한꺼번에 밀려 이동해요. 화면 아래 방향 버튼으로도 조작할 수 있어요</div></div>
+          <div class="rule-row"><div class="rule-num">2</div><div class="rule-text">이동하는 도중 <b>같은 행성 두 개가 부딪히면 하나로 합쳐지면서</b> 다음 단계 행성으로 진화해요. 합쳐진 행성은 또 다른 같은 행성과 부딪히면 계속 진화할 수 있어요</div></div>
+          <div class="rule-row"><div class="rule-num">3</div><div class="rule-text">진화 순서는 <b>태양에서 가까운 행성 순서</b> 그대로예요. 아래 순서대로 합쳐 나가면 돼요</div></div>
+          <div class="rule-row"><div class="rule-num">4</div><div class="rule-text">움직일 때마다 보드 빈 칸에 새 행성(수성 또는 금성)이 하나씩 나타나요. 보드가 가득 차서 더 이상 합칠 곳이 없으면 게임이 끝나요</div></div>
+          <div class="rule-row"><div class="rule-num">5</div><div class="rule-text">마지막 단계인 <b>태양</b>을 만들면 미션 성공! 어디까지 진화시켰는지에 따라 최종 칭호가 정해져요</div></div>
+        </div>
+        <div id="chain-preview"></div>
+        <button class="launch-btn" id="btn-to-game">시작</button>
+      </div>
+
+      <div class="screen" id="screen-game">
+        <button id="btn-quit-game">■ 게임 종료</button>
+        <div id="hud">
+          <div class="hud-block">
+            <div class="hud-label">MOVES</div>
+            <div class="hud-value" id="hud-moves">0</div>
+          </div>
+          <div class="hud-block right">
+            <div class="hud-label">BEST TILE</div>
+            <div class="hud-value" id="hud-best">-</div>
+          </div>
+        </div>
+        <div id="board-wrap">
+          <div id="softcap-banner">슬슬 마무리해볼까요?</div>
+          <div id="board">
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div id="tile-layer"></div>
+          </div>
+        </div>
+        <div id="dpad">
+          <button class="pad-btn" id="pad-up">▲</button>
+          <button class="pad-btn" id="pad-left">◀</button>
+          <button class="pad-btn" id="pad-down">▼</button>
+          <button class="pad-btn" id="pad-right">▶</button>
+        </div>
+      </div>
+
+      <div class="screen" id="screen-result">
+        <div class="topbar"><span class="link-back" id="back-from-result">← 뒤로</span></div>
+        <div class="result-title">RESULT</div>
+        <div id="result-tier">태양계 견습생 🪨</div>
+        <div id="stat-row">
+          <div class="stat-card"><div class="stat-num" id="stat-best">수성</div><div class="stat-lbl">도달 천체</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-moves">0</div><div class="stat-lbl">이동 횟수</div></div>
+        </div>
+        <div id="fact-card">
+          <div class="fact-label">천체 정보</div>
+          <div class="fact-name" id="fact-name">수성</div>
+          <div class="fact-desc" id="fact-desc">태양계에서 가장 작고 태양에 가장 가까운 행성이에요.</div>
+        </div>
+
+        <div id="panel-nickname" class="field-panel">
+          <label class="field-label">랭킹에 등록할 닉네임</label>
+          <input class="arcade-input" id="input-nickname" maxlength="10" placeholder="탐사대원-01">
+          <div class="row">
+            <button class="launch-btn" id="btn-submit-score" style="padding:13px 20px;font-size:15px;">랭킹 등록</button>
+          </div>
+          <div id="rank-submit-msg">✔ 랭킹에 등록되었어요!</div>
+          <button class="rank-btn" id="btn-view-ranking" style="display:none;width:100%;margin-top:10px;">🏆 랭킹에서 내 순위 확인하기</button>
+        </div>
+
+        <div class="result-btn-row">
+          <button class="launch-btn" id="btn-retry">다시하기</button>
+          <button class="ghost-btn" id="btn-to-title">처음 화면으로</button>
+        </div>
+      </div>
+
+      <!-- 공개 랭킹 (비밀번호 없이 누구나 확인) -->
+      <div class="screen" id="screen-ranking">
+        <div class="topbar">
+          <span class="link-back" id="back-from-ranking">← 뒤로</span>
+          <span class="eyebrow" style="margin:0;">RANKING</span>
+        </div>
+        <h1 class="title" style="font-size:clamp(20px,4vw,26px);margin-bottom:10px;">랭킹</h1>
+        <span class="status-pill"><span class="status-dot on"></span><span id="ranking-count-label">0명 등록</span></span>
+        <table class="board">
+          <thead><tr><th>순위</th><th>닉네임</th><th>도달 천체</th><th style="text-align:right;">이동횟수</th></tr></thead>
+          <tbody id="ranking-board-body"></tbody>
+        </table>
+        <div style="text-align:center; font-family:'Gothic A1', sans-serif; font-weight:600; font-size:clamp(10px,1.6vw,12px); color:var(--text-dim); line-height:1.6; margin-top:12px;">
+          © 부천천문과학관. All rights reserved.<br>
+          Developed by 김민찬
+        </div>
+        <span class="admin-link" id="btn-goto-admin">관리자 입장</span>
+      </div>
+
+      <!-- 관리자 인증 -->
+      <div class="screen" id="screen-admin-login">
+        <div class="admin-warn-box">
+          <div class="topbar" style="margin-bottom:14px;"><span class="link-back" id="back-from-adminlogin">← 뒤로</span></div>
+          <div class="eyebrow" style="margin-top:0;">RESTRICTED ACCESS</div>
+          <h1 class="title">관리자 인증</h1>
+        </div>
+        <div id="panel-adminpass" class="field-panel">
+          <label class="field-label">관리자 비밀번호</label>
+          <input class="arcade-input" id="input-adminpass" type="password" placeholder="••••••••">
+          <div class="row">
+            <button class="launch-btn" id="btn-admin-login" style="padding:13px 20px;font-size:15px;">인증</button>
+          </div>
+          <p id="admin-error">비밀번호가 올바르지 않습니다.</p>
+        </div>
+      </div>
+
+      <!-- 관리자 대시보드 -->
+      <div class="screen" id="screen-admin">
+        <div class="topbar">
+          <span class="link-back" id="btn-admin-logout">← 로그아웃</span>
+          <span class="eyebrow" style="margin:0;">CONTROL DECK</span>
+        </div>
+        <h1 class="title" style="font-size:clamp(20px,4vw,26px);margin-bottom:6px;">랭킹 관리</h1>
+        <div class="admin-grid">
+          <div class="stat-box"><div class="v" id="admin-total">0</div><div class="l">등록된 기록</div></div>
+          <div class="stat-box"><div class="v" id="admin-top">-</div><div class="l">도달 천체</div></div>
+        </div>
+        <div class="row" style="max-width:480px;">
+          <button class="ghost-btn" id="btn-admin-reset" style="margin-top:0;">랭킹 초기화</button>
+        </div>
+        <table class="board">
+          <thead><tr><th>순위</th><th>닉네임</th><th>도달 천체</th><th style="text-align:right;">이동횟수</th></tr></thead>
+          <tbody id="admin-board-body"></tbody>
+        </table>
+      </div>
+
+    </div>
+    <button id="sound-toggle">🔊</button>
+  </div>
+</div>
+
+<!-- 터치스크린 전용 화면 키보드 (닉네임/관리자 비밀번호 입력용, Space War 2095와 동일 형식) -->
+<div class="touch-kb" id="touchKeyboard" aria-hidden="true">
+  <div class="touch-kb-inner">
+    <div class="touch-kb-head">
+      <span class="touch-kb-title" id="touchKbTitle">닉네임 입력</span>
+      <div class="touch-kb-head-right">
+        <button type="button" class="touch-kb-lang" id="touchKbLang">한/영</button>
+        <button type="button" class="touch-kb-done" id="touchKbDone">완료 ▼</button>
+      </div>
+    </div>
+    <div class="touch-kb-row" data-row="1"></div>
+    <div class="touch-kb-row" data-row="2"></div>
+    <div class="touch-kb-row" data-row="3"></div>
+    <div class="touch-kb-row" data-row="4"></div>
+    <div class="touch-kb-row touch-kb-bottom">
+      <button type="button" class="touch-kb-key touch-kb-wide touch-kb-shift" id="touchKbShift" data-key="__shift">⇧ 쌍자음</button>
+      <button type="button" class="touch-kb-key touch-kb-space" data-key=" ">스페이스</button>
+      <button type="button" class="touch-kb-key touch-kb-wide" data-key="-">-</button>
+      <button type="button" class="touch-kb-key touch-kb-wide touch-kb-back" data-key="__back">⌫ 지우기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============== 화면 확대(핀치줌/더블탭줌) 완전 차단 ============== */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length > 1) e.preventDefault();
+}, { passive:false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+  const now = Date.now();
+  if(now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive:false });
+
+/* ============== 행성 데이터 ============== */
+const PLANETS = [
+  { stage:1, key:'mercury', name:'수성',  diameter:'4,879km',    distance:'태양에서 약 0.39 AU', desc:'태양에 가장 가까운 행성이에요. 대기가 거의 없어 낮과 밤의 온도차가 매우 커요.', color:'#b7a68f' },
+  { stage:2, key:'venus',   name:'금성',  diameter:'12,104km',   distance:'태양에서 약 0.72 AU', desc:'태양으로부터 두 번째 행성. 두꺼운 대기 때문에 태양계에서 표면 온도가 가장 높아요.', color:'#e8caa0' },
+  { stage:3, key:'earth',   name:'지구',  diameter:'12,742km',   distance:'태양에서 약 1 AU', desc:'태양계에서 세 번째 행성이자 유일하게 생명이 확인된 행성이에요.', color:'#4d8fd6' },
+  { stage:4, key:'mars',    name:'화성',  diameter:'6,779km',    distance:'태양에서 약 1.52 AU', desc:'붉은 행성, 표면의 산화철 때문에 붉게 보여요.', color:'#e0693f' },
+  { stage:5, key:'jupiter', name:'목성',  diameter:'139,820km',  distance:'태양에서 약 5.2 AU', desc:'태양계에서 가장 큰 행성, 대적점이라는 거대한 폭풍이 있어요.', color:'#d99a5b' },
+  { stage:6, key:'saturn',  name:'토성',  diameter:'116,460km',  distance:'태양에서 약 9.5 AU', desc:'얼음과 암석 조각으로 이루어진 화려한 고리가 특징이에요.', color:'#dcc389' },
+  { stage:7, key:'uranus',  name:'천왕성', diameter:'50,724km',  distance:'태양에서 약 19.2 AU', desc:'자전축이 거의 옆으로 누워 있는 특이한 행성이에요.', color:'#7fd7d1' },
+  { stage:8, key:'neptune', name:'해왕성', diameter:'49,244km',  distance:'태양에서 약 30.1 AU', desc:'태양계에서 가장 바깥쪽 행성, 강한 바람으로 유명해요.', color:'#3f5fd0' },
+  { stage:9, key:'sun',     name:'태양',  diameter:'1,391,000km',distance:'태양계의 중심', desc:'태양계 질량의 99.8%를 차지하는 항성이에요. 지구 109개가 일렬로 들어가는 크기예요.', color:'#f5c86b' },
+];
+function planetOf(stage){ return PLANETS[stage-1]; }
+
+/* ============== 화면 전환 ============== */
+const screens = document.querySelectorAll('.screen');
+function showScreen(id){
+  screens.forEach(s => s.classList.toggle('active', s.id === id));
+  // 타이틀로 돌아갈 때는 랭킹 등록 때 썼던 닉네임/등록 상태를 항상 빈 칸으로 초기화
+  if(id === 'screen-title'){
+    const nickInput = document.getElementById('input-nickname');
+    if(nickInput){ nickInput.value = ''; nickInput.disabled = false; }
+    const submitBtn = document.getElementById('btn-submit-score');
+    if(submitBtn){ submitBtn.disabled = false; submitBtn.style.opacity = ''; }
+    const msg = document.getElementById('rank-submit-msg');
+    if(msg) msg.style.display = 'none';
+    const viewRankBtn = document.getElementById('btn-view-ranking');
+    if(viewRankBtn) viewRankBtn.style.display = 'none';
+  }
+  if(window.closeTouchKeyboard) window.closeTouchKeyboard();
+  resetIdleTimer();
+}
+document.getElementById('btn-to-howto').addEventListener('click', ()=>{ playClick(); buildChainPreview(); showScreen('screen-howto'); });
+document.getElementById('back-from-howto').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
+document.getElementById('btn-to-game').addEventListener('click', ()=>{ playClick(); startGame(); });
+document.getElementById('btn-retry').addEventListener('click', ()=>{ playClick(); startGame(); });
+document.getElementById('btn-to-title').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
+document.getElementById('back-from-result').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
+
+/* ---------- 랭킹 화면 ---------- */
+document.getElementById('btn-to-ranking').addEventListener('click', ()=>{ playClick(); showScreen('screen-ranking'); renderRankingBoard(); });
+document.getElementById('back-from-ranking').addEventListener('click', ()=>{ playClick(); showScreen('screen-title'); });
+
+/* ---------- 관리자 인증/대시보드 ---------- */
+const ADMIN_PASSWORD = 'alien0707';
+let screenBeforeAdminLogin = 'screen-ranking';
+document.getElementById('btn-goto-admin').addEventListener('click', ()=>{
+  playClick();
+  screenBeforeAdminLogin = document.querySelector('.screen.active')?.id || 'screen-ranking';
+  document.getElementById('input-adminpass').value = '';
+  document.getElementById('admin-error').style.display = 'none';
+  showScreen('screen-admin-login');
+});
+document.getElementById('back-from-adminlogin').addEventListener('click', ()=>{ playClick(); showScreen(screenBeforeAdminLogin); });
+document.getElementById('btn-admin-login').addEventListener('click', ()=>{
+  const val = document.getElementById('input-adminpass').value;
+  if(val === ADMIN_PASSWORD){
+    document.getElementById('admin-error').style.display = 'none';
+    showScreen('screen-admin');
+    renderAdminBoard();
+  } else {
+    document.getElementById('admin-error').style.display = 'block';
+  }
+});
+document.getElementById('btn-admin-logout').addEventListener('click', ()=>{ playClick(); showScreen('screen-ranking'); renderRankingBoard(); });
+
+/* 한 번 더 눌러야 실행되는 '확인' 버튼 (게임 종료 / 랭킹 초기화처럼 실수로 누르면 안 되는 동작용) */
+function armConfirmButton(btn, confirmLabel, action, timeout=3000){
+  const original = btn.textContent;
+  let armed = false, timer = null;
+  btn.addEventListener('click', () => {
+    if (!armed){
+      armed = true;
+      btn.textContent = confirmLabel;
+      timer = setTimeout(() => { armed = false; btn.textContent = original; }, timeout);
+    } else {
+      clearTimeout(timer);
+      armed = false;
+      btn.textContent = original;
+      try { action(); } catch (e) { console.error('버튼 액션 실패:', e); }
+    }
+  });
+}
+armConfirmButton(document.getElementById('btn-quit-game'), '정말 종료? (다시 클릭)', () => {
+  if(gameOver) return;
+  playClick();
+  inputLocked = true;
+  finishGame();
+});
+armConfirmButton(document.getElementById('btn-admin-reset'), '정말 초기화? (다시 클릭)', () => {
+  resetRankings();
+  renderAdminBoard();
+});
+
+/* ---------- 랭킹 데이터 (이 기기의 브라우저에 저장 · localStorage) ---------- */
+/* 랭킹 기준: 최고 도달 천체(bestStage)가 높을수록 우선, 같으면 이동횟수(moves)가 적을수록 상위 */
+const RANK_KEY = 'planetMerge_rankings_v2';
+function loadRankings(){
+  try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveRankings(list){
+  try { localStorage.setItem(RANK_KEY, JSON.stringify(list)); } catch(e){}
+}
+function makeEntryId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function addRanking(nick, bestStageVal, bestName, movesVal){
+  const list = loadRankings();
+  const id = makeEntryId();
+  list.push({ id, nickname: nick, bestStage: bestStageVal, best: bestName, moves: movesVal, at: Date.now() });
+  list.sort((a,b)=> (b.bestStage-a.bestStage) || (a.moves-b.moves) || (b.at-a.at));
+  saveRankings(list.slice(0,200));
+  return id;
+}
+function resetRankings(){ saveRankings([]); }
+// 동순위 처리 (예: 1,2,2,4,5) — list는 최고천체 내림차순, 이동횟수 오름차순으로 정렬되어 있어야 함
+function computeRanks(list){
+  let rank = 0, prevKey = null;
+  return list.map((p, i) => {
+    const key = p.bestStage + '_' + p.moves;
+    if (key !== prevKey){ rank = i + 1; prevKey = key; }
+    return { ...p, rank };
+  });
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderRankingBoard(){
+  const list = loadRankings();
+  document.getElementById('ranking-count-label').textContent = list.length + '명 등록';
+  const body = document.getElementById('ranking-board-body');
+  const ranked = computeRanks(list).slice(0,20);
+  body.innerHTML = ranked.map(p => `
+    <tr class="${p.rank===1?'top':''}">
+      <td><span class="rank-badge">${p.rank}</span></td>
+      <td>${escapeHtml(p.nickname || '익명')}</td>
+      <td>${escapeHtml(p.best || '-')}</td>
+      <td style="text-align:right;">${p.moves||0}</td>
+    </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim);">등록된 기록이 없습니다</td></tr>';
+}
+function renderAdminBoard(){
+  const list = loadRankings();
+  document.getElementById('admin-total').textContent = list.length;
+  document.getElementById('admin-top').textContent = list.length ? (list[0].best||'-') : '-';
+  const body = document.getElementById('admin-board-body');
+  const ranked = computeRanks(list).slice(0,30);
+  body.innerHTML = ranked.map(p => `
+    <tr class="${p.rank===1?'top':''}">
+      <td><span class="rank-badge">${p.rank}</span></td>
+      <td>${escapeHtml(p.nickname || '익명')}</td>
+      <td>${escapeHtml(p.best || '-')}</td>
+      <td style="text-align:right;">${p.moves||0}</td>
+
+    </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim);">등록된 기록이 없습니다</td></tr>';
+}
+document.getElementById('btn-submit-score').addEventListener('click', ()=>{
+  const nickInput = document.getElementById('input-nickname');
+  const nick = nickInput.value.trim() || '탐사대원';
+  const newId = addRanking(nick, bestStage, planetOf(bestStage).name, moveCount);
+  const ranked = computeRanks(loadRankings());
+  const mine = ranked.find(p => p.id === newId);
+  document.getElementById('rank-submit-msg').innerHTML = mine
+    ? `✔ 랭킹에 등록되었어요! 현재 <b>${mine.rank}위</b>예요`
+    : '✔ 랭킹에 등록되었어요!';
+  document.getElementById('rank-submit-msg').style.display = 'block';
+  document.getElementById('btn-view-ranking').style.display = 'inline-flex';
+  nickInput.disabled = true;
+  const submitBtn = document.getElementById('btn-submit-score');
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = '.5';
+  playClick();
+});
+document.getElementById('btn-view-ranking').addEventListener('click', ()=>{
+  playClick();
+  showScreen('screen-ranking');
+  renderRankingBoard();
+});
+
+function buildChainPreview(){
+  const wrap = document.getElementById('chain-preview');
+  wrap.innerHTML = '';
+  PLANETS.forEach((p, i)=>{
+    const item = document.createElement('div');
+    item.className = 'chain-item';
+    const dot = document.createElement('div');
+    dot.className = 'chain-dot';
+    dot.style.background = p.color;
+    const label = document.createElement('div');
+    label.className = 'chain-name';
+    label.textContent = p.name;
+    item.appendChild(dot);
+    item.appendChild(label);
+    wrap.appendChild(item);
+    if(i < PLANETS.length-1){
+      const arrow = document.createElement('div');
+      arrow.className = 'chain-arrow';
+      arrow.textContent = '→';
+      wrap.appendChild(arrow);
+    }
+  });
+}
+
+/* ============== 터치스크린 화면 키보드 (Space War 2095와 동일 형식) ============== */
+// 물리 키보드가 없는 터치 전용 화면에서도 닉네임/관리자 비밀번호를 입력할 수 있도록,
+// 화면 하단에서 올라오는 자체 키보드를 제공합니다.
+(function setupTouchKeyboard(){
+  const KB_ROWS_EN = [
+    ['1','2','3','4','5','6','7','8','9','0'],
+    ['q','w','e','r','t','y','u','i','o','p'],
+    ['a','s','d','f','g','h','j','k','l'],
+    ['z','x','c','v','b','n','m'],
+  ];
+  // 두벌식(2-beolsik) 표준 자판 배열
+  const KB_ROWS_KO = [
+    ['1','2','3','4','5','6','7','8','9','0'],
+    ['ㅂ','ㅈ','ㄷ','ㄱ','ㅅ','ㅛ','ㅕ','ㅑ','ㅐ','ㅔ'],
+    ['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],
+    ['ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ'],
+  ];
+  // 시프트(쌍자음/이중모음) 매핑
+  const SHIFT_MAP = { 'ㅂ':'ㅃ', 'ㅈ':'ㅉ', 'ㄷ':'ㄸ', 'ㄱ':'ㄲ', 'ㅅ':'ㅆ', 'ㅐ':'ㅒ', 'ㅔ':'ㅖ' };
+
+  // ---- 한글 조합(초성/중성/종성 → 완성형 음절) 관련 테이블 ----
+  const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const CHO_SET = new Set(CHO), JUNG_SET = new Set(JUNG);
+  const JUNG_COMBO = { 'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ' };
+  const JUNG_SPLIT = { 'ㅘ':'ㅗ','ㅙ':'ㅗ','ㅚ':'ㅗ','ㅝ':'ㅜ','ㅞ':'ㅜ','ㅟ':'ㅜ','ㅢ':'ㅡ' };
+  const JONG_COMBO = { 'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ' };
+  const JONG_SPLIT = { 'ㄳ':'ㄱ','ㄵ':'ㄴ','ㄶ':'ㄴ','ㄺ':'ㄹ','ㄻ':'ㄹ','ㄼ':'ㄹ','ㄽ':'ㄹ','ㄾ':'ㄹ','ㄿ':'ㄹ','ㅀ':'ㄹ','ㅄ':'ㅂ' };
+  const JONG_PARTS = {}; // 겹받침 → [앞 받침, 다음 음절 초성으로 넘어갈 자음]
+  for (const k in JONG_COMBO){ JONG_PARTS[JONG_COMBO[k]] = [k[0], k[1]]; }
+
+  function decompose(ch){
+    if (!ch) return null;
+    const c = ch.charCodeAt(0);
+    if (c < 0xAC00 || c > 0xD7A3) return null;
+    const idx = c - 0xAC00;
+    const jong = idx % 28;
+    const jung = ((idx - jong) / 28) % 21;
+    const cho = (((idx - jong) / 28) - jung) / 21;
+    return { cho, jung, jong };
+  }
+  function compose(cho, jung, jong){
+    return String.fromCharCode(0xAC00 + (cho*21 + jung)*28 + jong);
+  }
+
+  const kb = document.getElementById('touchKeyboard');
+  const rowEls = kb.querySelectorAll('.touch-kb-row[data-row]');
+  const langBtn = document.getElementById('touchKbLang');
+  const shiftBtn = document.getElementById('touchKbShift');
+
+  let mode = 'ko'; // 'ko' | 'en' — 기본값: 한글
+  let shiftOn = false;
+
+  function renderKeys(){
+    const rows = mode === 'ko' ? KB_ROWS_KO : KB_ROWS_EN;
+    rowEls.forEach((rowEl, i) => {
+      rowEl.innerHTML = '';
+      (rows[i] || []).forEach(k => {
+        let display = k;
+        if (mode === 'ko' && shiftOn && SHIFT_MAP[k]) display = SHIFT_MAP[k];
+        else if (mode === 'en' && shiftOn && /^[a-z]$/.test(k)) display = k.toUpperCase();
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'touch-kb-key';
+        btn.dataset.key = display;
+        btn.textContent = display;
+        rowEl.appendChild(btn);
+      });
+    });
+    shiftBtn.style.display = 'flex';
+    shiftBtn.textContent = mode === 'ko' ? '⇧ 쌍자음' : '⇧ 대문자';
+    shiftBtn.classList.toggle('on', shiftOn);
+    langBtn.textContent = mode === 'ko' ? '한글' : 'EN';
+  }
+  renderKeys();
+
+  let activeInput = null;
+  const kbTitleEl = document.getElementById('touchKbTitle');
+  const KB_TITLES = {
+    'input-nickname': '닉네임 입력',
+    'input-adminpass': '관리자 비밀번호 입력'
+  };
+
+  function openTouchKeyboard(inputEl){
+    activeInput = inputEl;
+    if (kbTitleEl) kbTitleEl.textContent = KB_TITLES[inputEl.id] || '입력';
+    kb.classList.add('show');
+  }
+  window.closeTouchKeyboard = function(){
+    kb.classList.remove('show');
+    activeInput = null;
+  };
+
+  function atCaretEnd(el){
+    const start = el.selectionStart, end = el.selectionEnd;
+    return start === end && end === el.value.length;
+  }
+
+  function insertText(str){
+    if (!activeInput) return;
+    const el = activeInput;
+    const max = el.maxLength > 0 ? el.maxLength : Infinity;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    if (el.value.length - (end - start) + str.length > max) return;
+    el.value = el.value.slice(0, start) + str + el.value.slice(end);
+    const pos = start + str.length;
+    el.setSelectionRange(pos, pos);
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+  }
+
+  // 마지막 한 글자를 newStr(1~2자)로 교체 (자모 조합용)
+  function replaceLastChar(newStr){
+    const el = activeInput;
+    const max = el.maxLength > 0 ? el.maxLength : Infinity;
+    const val = el.value;
+    const newVal = val.slice(0, -1) + newStr;
+    if (newVal.length > max) return;
+    el.value = newVal;
+    el.setSelectionRange(newVal.length, newVal.length);
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+  }
+
+  // 한글 자모 입력 → 완성형 음절로 실시간 조합
+  function composeJamo(ch){
+    const el = activeInput;
+    if (!el) return;
+    if (!atCaretEnd(el)){
+      // 커서가 중간에 있으면 단순 삽입으로 대체 (조합 생략)
+      insertText(ch);
+      return;
+    }
+    const last = el.value.slice(-1);
+    if (CHO_SET.has(ch)){
+      const d = decompose(last);
+      if (d){
+        if (d.jong === 0){
+          const jongIdx = JONG.indexOf(ch);
+          if (jongIdx > 0){ replaceLastChar(compose(d.cho, d.jung, jongIdx)); return; }
+        } else {
+          const comboChar = JONG_COMBO[JONG[d.jong] + ch];
+          if (comboChar){ replaceLastChar(compose(d.cho, d.jung, JONG.indexOf(comboChar))); return; }
+        }
+      }
+      insertText(ch); // 새 음절의 초성으로 시작
+    } else if (JUNG_SET.has(ch)){
+      const d = decompose(last);
+      if (d){
+        if (d.jong === 0){
+          const comboChar = JUNG_COMBO[JUNG[d.jung] + ch];
+          if (comboChar){ replaceLastChar(compose(d.cho, JUNG.indexOf(comboChar), 0)); return; }
+          insertText(ch); // 결합 불가 → 홀로 낱자 삽입
+        } else {
+          // 종성을 다음 음절의 초성으로 넘김 (예: "간"+ㅏ→"가나", 겹받침 "값"+ㅣ→"갑시")
+          const jongChar = JONG[d.jong];
+          let firstJongIdx, movedChoChar;
+          if (JONG_PARTS[jongChar]){
+            firstJongIdx = JONG.indexOf(JONG_PARTS[jongChar][0]);
+            movedChoChar = JONG_PARTS[jongChar][1];
+          } else {
+            firstJongIdx = 0;
+            movedChoChar = jongChar;
+          }
+          const finalized = compose(d.cho, d.jung, firstJongIdx);
+          const movedCho = CHO.indexOf(movedChoChar);
+          if (movedCho >= 0){
+            replaceLastChar(finalized + compose(movedCho, JUNG.indexOf(ch), 0));
+          } else {
+            insertText(ch);
+          }
+        }
+      } else if (CHO_SET.has(last)){
+        // 낱자 초성 뒤에 모음 → 조합
+        replaceLastChar(compose(CHO.indexOf(last), JUNG.indexOf(ch), 0));
+      } else {
+        insertText(ch);
+      }
+    }
+  }
+
+  function backspace(){
+    if (!activeInput) return;
+    const el = activeInput;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    if (start !== end){
+      el.value = el.value.slice(0, start) + el.value.slice(end);
+      el.setSelectionRange(start, start);
+      el.dispatchEvent(new Event('input', { bubbles:true }));
+      return;
+    }
+    if (start === 0) return;
+    const value = el.value;
+    const last = value.slice(start-1, start);
+    const d = decompose(last);
+    if (d){
+      let newChar;
+      if (d.jong !== 0){
+        const splitTo = JONG_SPLIT[JONG[d.jong]];
+        newChar = compose(d.cho, d.jung, splitTo ? JONG.indexOf(splitTo) : 0);
+      } else {
+        const splitTo = JUNG_SPLIT[JUNG[d.jung]];
+        newChar = splitTo ? compose(d.cho, JUNG.indexOf(splitTo), 0) : CHO[d.cho];
+      }
+      el.value = value.slice(0, start-1) + newChar + value.slice(start);
+      el.setSelectionRange(start, start);
+    } else {
+      el.value = value.slice(0, start-1) + value.slice(start);
+      el.setSelectionRange(start-1, start-1);
+    }
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+  }
+
+  kb.addEventListener('pointerdown', e => {
+    const btn = e.target.closest('.touch-kb-key, .touch-kb-lang');
+    if (!btn) return;
+    e.preventDefault(); // input 포커스가 풀리지 않도록
+    if (btn.id === 'touchKbLang'){
+      mode = mode === 'ko' ? 'en' : 'ko';
+      shiftOn = false;
+      renderKeys();
+    } else if (btn.dataset.key === '__back'){
+      backspace();
+    } else if (btn.dataset.key === '__shift'){
+      shiftOn = !shiftOn;
+      renderKeys();
+    } else if (mode === 'ko' && (CHO_SET.has(btn.dataset.key) || JUNG_SET.has(btn.dataset.key))){
+      composeJamo(btn.dataset.key);
+      if (shiftOn){ shiftOn = false; renderKeys(); }
+    } else {
+      insertText(btn.dataset.key);
+      if (mode === 'en' && shiftOn && /^[A-Z]$/.test(btn.dataset.key)){ shiftOn = false; renderKeys(); }
+    }
+    if (activeInput) activeInput.focus();
+  });
+  document.getElementById('touchKbDone').addEventListener('click', () => {
+    window.closeTouchKeyboard();
+  });
+
+  // 닉네임 입력칸 + 관리자 비밀번호 입력칸에 키보드 연결
+  ['input-nickname', 'input-adminpass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.setAttribute('inputmode', 'none'); // 기본 OS 키보드 대신 커스텀 키보드 사용
+    el.setAttribute('autocomplete', 'off');
+    el.addEventListener('focus', () => openTouchKeyboard(el));
+    el.addEventListener('pointerdown', () => openTouchKeyboard(el));
+  });
+})();
+
+/* ============== idle timeout : 1분 무입력 시 자동 종료 + 랭킹 익명 등록 + 허브로 복귀 ============== */
+const IDLE_TIMEOUT_MS = 60000;
+let idleTimer = null;
+function notifyParentGoHome(){
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'go-home' }, '*');
+      return;
+    }
+  } catch(e) {}
+  showScreen('screen-title');
+}
+function resetIdleTimer(){
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(()=>{
+    const activeId = document.querySelector('.screen.active').id;
+    if(activeId === 'screen-game' && !gameOver){
+      inputLocked = true;
+      finishGame();
+      addRanking('익명', bestStage, planetOf(bestStage).name, moveCount);
+    }
+    notifyParentGoHome();
+  }, IDLE_TIMEOUT_MS);
+}
+['pointerdown','touchstart'].forEach(evt=>{
+  document.addEventListener(evt, resetIdleTimer, {passive:true});
+});
+resetIdleTimer();
+
+/* ============== 게임 상태 ============== */
+const GRID = 4;
+let board = [];      // board[r][c] = stage(0=empty) or 0
+let tileEls = {};    // id -> element
+let tileSeq = 0;
+let score = 0;
+let bestStage = 1;
+let moveCount = 0;
+let gameOver = false;
+let sunReached = false;
+let inputLocked = false;
+
+function emptyBoard(){
+  return Array.from({length:GRID}, ()=>Array(GRID).fill(null));
+}
+
+function startGame(){
+  board = emptyBoard();
+  score = 0; bestStage = 1; moveCount = 0; gameOver = false; sunReached = false; inputLocked = false;
+  document.getElementById('tile-layer').innerHTML = '';
+  document.getElementById('hud-moves').textContent = '0';
+  document.getElementById('hud-best').textContent = '수성';
+  document.getElementById('softcap-banner').classList.remove('show');
+  tileEls = {};
+  spawnRandomTile();
+  spawnRandomTile();
+  showScreen('screen-game');
+  renderBoard(true);
+}
+
+function randomEmptyCell(){
+  const empties = [];
+  for(let r=0;r<GRID;r++) for(let c=0;c<GRID;c++) if(!board[r][c]) empties.push([r,c]);
+  if(empties.length === 0) return null;
+  return empties[Math.floor(Math.random()*empties.length)];
+}
+
+function spawnRandomTile(){
+  const cell = randomEmptyCell();
+  if(!cell) return;
+  const [r,c] = cell;
+  const stage = Math.random() < 0.85 ? 1 : 2;
+  const id = 'tile' + (++tileSeq);
+  board[r][c] = { id, stage };
+}
+
+/* ---------- 보드 렌더링 ---------- */
+function cellSize(){
+  const board = document.getElementById('board');
+  const rect = board.getBoundingClientRect();
+  const pad = 8, gap = 8;
+  return (rect.width - pad*2 - gap*3) / GRID;
+}
+function cellPos(idx, size, gap){ return idx*(size+gap); }
+
+function renderBoard(isInitial){
+  const layer = document.getElementById('tile-layer');
+  const size = cellSize();
+  const gap = 8;
+  const seen = new Set();
+
+  for(let r=0;r<GRID;r++){
+    for(let c=0;c<GRID;c++){
+      const cell = board[r][c];
+      if(!cell) continue;
+      seen.add(cell.id);
+      let el = tileEls[cell.id];
+      const p = planetOf(cell.stage);
+      if(!el){
+        el = document.createElement('div');
+        el.className = 'tile spawn';
+        el.innerHTML = '<div class="p-name"></div>';
+        layer.appendChild(el);
+        tileEls[cell.id] = el;
+        setTimeout(()=>el.classList.remove('spawn'), 180);
+      }
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.left = cellPos(c, size, gap) + 'px';
+      el.style.top = cellPos(r, size, gap) + 'px';
+      el.style.backgroundColor = p.color;
+      PLANETS.forEach(pl => el.classList.remove('planet-' + pl.key));
+      el.classList.add('planet-' + p.key);
+      el.classList.toggle('sun', p.stage === 9);
+      el.querySelector('.p-name').textContent = p.name;
+      el.querySelector('.p-name').style.fontSize = Math.max(11, size*0.14) + 'px';
+    }
+  }
+  // 사라진 타일 제거
+  Object.keys(tileEls).forEach(id=>{
+    if(!seen.has(id)){ tileEls[id].remove(); delete tileEls[id]; }
+  });
+}
+
+/* ---------- 이동/병합 로직 ---------- */
+function cloneBoard(){
+  return board.map(row => row.map(cell => cell ? {...cell} : null));
+}
+function boardsEqual(a,b){
+  for(let r=0;r<GRID;r++) for(let c=0;c<GRID;c++){
+    const ca=a[r][c], cb=b[r][c];
+    if(!!ca !== !!cb) return false;
+    if(ca && (ca.id!==cb.id || ca.stage!==cb.stage)) return false;
+  }
+  return true;
+}
+
+function getLine(dir, i){
+  // dir: 'left','right','up','down' ; i = row or col index
+  const line = [];
+  for(let k=0;k<GRID;k++){
+    if(dir==='left'||dir==='right') line.push([i,k]);
+    else line.push([k,i]);
+  }
+  if(dir==='right'||dir==='down') line.reverse();
+  return line;
+}
+
+function move(dir){
+  if(inputLocked || gameOver) return;
+  const prev = cloneBoard();
+  let merged = false;
+  let mergedTileIds = [];
+
+  for(let i=0;i<GRID;i++){
+    const coords = getLine(dir, i);
+    let cells = coords.map(([r,c]) => board[r][c]).filter(Boolean);
+    const newCells = [];
+    let skip = false;
+    for(let k=0;k<cells.length;k++){
+      if(skip){ skip=false; continue; }
+      if(k+1 < cells.length && cells[k].stage === cells[k+1].stage && cells[k].stage < 9){
+        const newStage = cells[k].stage + 1;
+        newCells.push({ id: cells[k+1].id, stage: newStage, mergedFrom:true });
+        mergedTileIds.push(cells[k+1].id);
+        score += newStage * 10;
+        if(newStage > bestStage) bestStage = newStage;
+        if(newStage === 9) sunReached = true;
+        skip = true;
+        merged = true;
+      } else {
+        newCells.push(cells[k]);
+      }
+    }
+    // 빈 칸으로 채우고 좌표에 재배치
+    for(let k=0;k<coords.length;k++){
+      const [r,c] = coords[k];
+      board[r][c] = newCells[k] || null;
+    }
+  }
+
+  if(!boardsEqual(prev, board)){
+    moveCount++;
+    document.getElementById('hud-moves').textContent = String(moveCount);
+    document.getElementById('hud-best').textContent = planetOf(bestStage).name;
+    spawnRandomTile();
+    renderBoard(false);
+    mergedTileIds.forEach(id=>{
+      const el = tileEls[id];
+      if(el){ el.classList.remove('merged'); void el.offsetWidth; el.classList.add('merged'); }
+    });
+    if(merged){
+      if(sunReached){ playSun(); } else { playMerge(bestStage); }
+    } else {
+      playSlide();
+    }
+    checkSoftCap();
+    if(sunReached){
+      inputLocked = true;
+      setTimeout(()=> finishGame(), 900);
+      return;
+    }
+    if(!hasAnyMove()){
+      inputLocked = true;
+      setTimeout(()=> finishGame(), 500);
+    }
+  }
+}
+
+function hasAnyMove(){
+  for(let r=0;r<GRID;r++) for(let c=0;c<GRID;c++){
+    if(!board[r][c]) return true;
+    const cell = board[r][c];
+    const neighbors = [[r+1,c],[r-1,c],[r,c+1],[r,c-1]];
+    for(const [nr,nc] of neighbors){
+      if(nr>=0&&nr<GRID&&nc>=0&&nc<GRID && board[nr][nc] && board[nr][nc].stage===cell.stage) return true;
+    }
+  }
+  return false;
+}
+
+function checkSoftCap(){
+  const banner = document.getElementById('softcap-banner');
+  if(moveCount === 80){
+    banner.classList.add('show');
+    setTimeout(()=> banner.classList.remove('show'), 3500);
+  }
+}
+
+/* ---------- 입력: 스와이프 + 방향 버튼 ---------- */
+const boardEl = document.getElementById('board');
+let touchStartX=0, touchStartY=0, touchActive=false;
+boardEl.addEventListener('touchstart', (e)=>{
+  if(e.touches.length!==1) return;
+  touchActive = true;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+boardEl.addEventListener('touchend', (e)=>{
+  if(!touchActive) return;
+  touchActive = false;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+  const absX = Math.abs(dx), absY = Math.abs(dy);
+  const threshold = 24;
+  if(Math.max(absX,absY) < threshold) return;
+  if(absX > absY){ move(dx > 0 ? 'right' : 'left'); }
+  else { move(dy > 0 ? 'down' : 'up'); }
+}, {passive:true});
+
+document.getElementById('pad-up').addEventListener('click', ()=> move('up'));
+document.getElementById('pad-down').addEventListener('click', ()=> move('down'));
+document.getElementById('pad-left').addEventListener('click', ()=> move('left'));
+document.getElementById('pad-right').addEventListener('click', ()=> move('right'));
+
+document.addEventListener('keydown', (e)=>{
+  if(document.getElementById('screen-game').classList.contains('active')){
+    if(e.key==='ArrowUp') move('up');
+    else if(e.key==='ArrowDown') move('down');
+    else if(e.key==='ArrowLeft') move('left');
+    else if(e.key==='ArrowRight') move('right');
+  }
+});
+
+window.addEventListener('resize', ()=>{ if(document.getElementById('screen-game').classList.contains('active')) renderBoard(false); });
+
+/* ============== 결과 화면 ============== */
+const TIERS = [
+  { min:1, max:3, name:'태양계 견습생 🪨' },
+  { min:4, max:5, name:'행성 탐사대원 🌍' },
+  { min:6, max:7, name:'태양계 설계자 🪐' },
+  { min:8, max:8, name:'가스 거인 지휘관 🌀' },
+  { min:9, max:9, name:'항성 창조자 ☀️' },
+];
+function finishGame(){
+  gameOver = true;
+  const p = planetOf(bestStage);
+  document.getElementById('stat-best').textContent = p.name;
+  document.getElementById('stat-moves').textContent = moveCount;
+
+  let tier = TIERS[0];
+  for(const t of TIERS){ if(bestStage >= t.min && bestStage <= t.max) tier = t; }
+  document.getElementById('result-tier').textContent = tier.name;
+
+  document.getElementById('fact-name').textContent = p.name + ' · ' + p.distance;
+  document.getElementById('fact-desc').textContent = p.desc + ' (지름 ' + p.diameter + ')';
+
+  // 새 결과가 나올 때마다 닉네임 등록 칸을 다시 입력 가능한 상태로 초기화
+  const nickInput = document.getElementById('input-nickname');
+  nickInput.value = '';
+  nickInput.disabled = false;
+  const submitBtn = document.getElementById('btn-submit-score');
+  submitBtn.disabled = false;
+  submitBtn.style.opacity = '';
+  document.getElementById('rank-submit-msg').style.display = 'none';
+  document.getElementById('btn-view-ranking').style.display = 'none';
+
+  playResultSound();
+  showScreen('screen-result');
+}
+
+/* ============== 사운드 (Web Audio API) ============== */
+let audioCtx = null;
+let muted = false;
+function ensureAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, dur, type='sine', gainVal=0.08){
+  if(muted) return;
+  const ctx = ensureAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + dur);
+}
+function playClick(){ tone(880, 0.1, 'sine', 0.07); }
+function playSlide(){ tone(300, 0.05, 'triangle', 0.02); }
+function playMerge(stage){
+  // 단계가 높을수록 음이 낮아짐
+  const freq = 1200 - stage*80;
+  tone(Math.max(freq,300), 0.14, 'sine', 0.08);
+}
+function playSun(){
+  if(muted) return;
+  [523.25, 659.25, 783.99, 1046.5].forEach((f,i)=>{
+    setTimeout(()=>tone(f, 0.3, 'triangle', 0.09), i*90);
+  });
+}
+function playResultSound(){
+  if(muted) return;
+  [440, 554.37, 659.25].forEach((f,i)=>{
+    setTimeout(()=>tone(f, 0.35, 'triangle', 0.07), i*100);
+  });
+}
+document.getElementById('sound-toggle').addEventListener('click', function(){
+  muted = !muted;
+  this.textContent = muted ? '🔇' : '🔊';
+  this.classList.toggle('muted', muted);
+  if(!muted) ensureAudio();
+});
+
+/* ============== 배경 별밭 ============== */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas(){
+  const rect = document.getElementById('frame').getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  stars = Array.from({length:110}, ()=>({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*1.4+0.3,
+    tw: Math.random()*Math.PI*2,
+  }));
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+function drawStars(t){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#ECEDF6';
+  stars.forEach(s=>{
+    const alpha = 0.35 + 0.5*Math.abs(Math.sin(t/1400 + s.tw));
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawStars);
+}
+requestAnimationFrame(drawStars);
+</script>
+</body>
+</html>
