@@ -95,6 +95,9 @@
     border-radius:999px;cursor:pointer;margin-top:16px;
   }
   .ghost-btn:active{border-color:var(--aurora);color:var(--aurora);}
+  a.ghost-btn{text-decoration:none;display:inline-block;text-align:center;}
+  .hub-btn{font-size:14px;padding:11px 26px;margin-top:12px;}
+  .result-btn-row .hub-btn{margin-top:0;}
 
   /* 화면 상단 뒤로가기 바 (게임 플레이 화면 제외 전 화면 공통) */
   .topbar{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;max-width:520px;}
@@ -496,7 +499,7 @@
           <div class="id-grid">
             <div>
               <label class="field-label" for="input-name">이름</label>
-              <input class="arcade-input" id="input-name" maxlength="10" placeholder="예) 김민준" autocomplete="name" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
+              <input class="arcade-input" id="input-name" maxlength="10" placeholder="예) 김민준" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
             </div>
             <div>
               <label class="field-label" for="input-phone">휴대폰 번호 뒷 4자리</label>
@@ -508,6 +511,7 @@
         <div class="notice-box" id="closedNotice">🏁 운영이 종료되었어요.<br>참여해 주셔서 감사합니다. 아래에서 최종 순위를 확인할 수 있어요.</div>
         <div class="notice-box" id="blockNotice">😊 이미 참여하셨습니다!<br>참여해 주셔서 감사합니다.</div>
         <button class="rank-btn" id="btn-to-ranking">🏆 내 순위 다시 확인하기</button>
+        <a class="ghost-btn hub-btn" id="hub-title" href="https://dsvit100.github.io/game_hub/">🏠 허브로 돌아가기</a>
         <p class="title-note" id="titleNote"></p>
         <div class="credit">
           © 부천천문과학관. All rights reserved.
@@ -589,6 +593,7 @@
         <div class="result-btn-row">
           <button class="launch-btn" id="btn-retry">다시하기</button>
           <button class="ghost-btn" id="btn-to-title">처음 화면으로</button>
+          <a class="ghost-btn hub-btn" id="hub-result" href="https://dsvit100.github.io/game_hub/">🏠 허브로 돌아가기</a>
         </div>
       </div>
 
@@ -599,7 +604,7 @@
         <div class="modal-title">📊 내 순위 확인</div>
         <div class="modal-desc">참여할 때 입력한 이름과<br>휴대폰 번호 뒷 4자리를 입력해 주세요.</div>
         <label class="field-label" for="lookup-name">이름</label>
-        <input class="arcade-input" id="lookup-name" maxlength="10" placeholder="예) 김민준" autocomplete="name" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
+        <input class="arcade-input" id="lookup-name" maxlength="10" placeholder="예) 김민준" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
         <label class="field-label" for="lookup-phone">휴대폰 번호 뒷 4자리</label>
         <input class="arcade-input" id="lookup-phone" type="tel" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="예) 1234" autocomplete="off" enterkeyhint="go">
         <div class="row">
@@ -613,6 +618,7 @@
       <div class="co-title">운영이 종료되었습니다</div>
       <div class="co-desc">정해진 운영 시간이 지나 이 페이지는 더 이상 이용할 수 없어요.<br>참여해 주셔서 감사합니다. (© 부천천문과학관)</div>
       <button class="launch-btn" id="btn-closed-rank" style="display:none;">🏆 최종 순위 확인하기</button>
+      <a class="ghost-btn" id="hub-closed" style="margin-top:0;" href="https://dsvit100.github.io/game_hub/">🏠 허브로 돌아가기</a>
     </div>
     <button id="sound-toggle">🔊</button>
   </div>
@@ -649,12 +655,12 @@ function planetOf(stage){ return PLANETS[stage-1]; }
 
 /* ============== 설정 (운영 전 꼭 확인) ============== */
 /* ⚠️ game6_Code.gs 를 Apps Script 웹앱으로 배포한 뒤, 그 URL(…/exec)을 아래에 붙여넣으세요 */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8wFXO9tNR5BzIa9_60B-aOEHbOIqkKCt1bgk2YPeESP0kMLm45Hlif8lvxbwpgOlN8Q/exec";
+const SCRIPT_URL = "여기에_배포_URL_붙여넣기";
 const PRIZE_NAME = '우주 관련 도서';      // 1위 상품명
 /* 테스트용: false = 중복 참여 제한 해제 (goldenbell과 동일).
    개인 휴대폰(QR)으로만 운영할 때만 true 로. 공용 터치스크린에서는 절대 true 금지 */
 const ENABLE_DEVICE_LIMIT = false;
-const REMEMBER_IDENTITY = true;          // true: 개인 폰·태블릿에서 이름/번호를 기억해 다음 접속 때 자동 입력 (기기를 여러 명이 돌려 쓰면 false)
+const REMEMBER_IDENTITY = false;         // false: 이름/번호를 저장·자동입력하지 않음 (true 로 바꾸면 다음 접속 때 자동 입력)
 /* 운영 종료 후에도 '최종 순위 확인' 버튼을 보여줄지.
    true  = 종료 안내 화면에 [최종 순위 확인하기] 버튼이 남음 (순위 조회만 가능, 종료 후에는 배송정보 입력·수정 불가)
    false = 종료 안내 화면만 보이고 아무것도 할 수 없음 (완전 차단) */
@@ -1415,6 +1421,7 @@ requestAnimationFrame(drawStars);
 /* ============== 모바일 보강 ============== */
 /* 이전에 입력한 이름·번호 자동 채우기 */
 window.addEventListener('DOMContentLoaded', () => {
+  if(!REMEMBER_IDENTITY){ try { localStorage.removeItem('pm_name'); localStorage.removeItem('pm_phone'); } catch(e){} }   // 예전에 저장된 이름·번호 삭제
   if(REMEMBER_IDENTITY){
     const n = LS.get('pm_name'), p = LS.get('pm_phone');
     if(n && !$('input-name').value) $('input-name').value = n;
@@ -1480,6 +1487,11 @@ document.addEventListener('visibilitychange', () => {
     if($('screen-result').classList.contains('active') && me && !pendingPayload) refresh(false);
   }
 });
+
+/* 허브로 돌아가기: 기록이 아직 서버에 저장되지 않았다면 한 번 더 확인 */
+['hub-title','hub-result','hub-closed'].forEach(id => $(id).addEventListener('click', e => {
+  if(pendingPayload && !confirm('아직 기록이 서버에 저장되지 않았어요.\n그래도 허브로 이동할까요?')) e.preventDefault();
+}));
 
 /* 플레이 중 실수로 뒤로가기·새로고침 시 확인 */
 window.addEventListener('beforeunload', e => {
