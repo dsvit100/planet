@@ -30,7 +30,7 @@
     margin:0;padding:0;height:100%;
     background:#000;
     color:var(--text-main);
-    font-family:'Gowun Dodum', sans-serif;
+    font-family:'Gowun Dodum','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
     overflow:hidden;overscroll-behavior:none;
     word-break:keep-all;
     overflow-wrap:break-word;
@@ -73,17 +73,17 @@
   @keyframes fadein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
   .eyebrow{
-    font-family:'Space Grotesk',sans-serif;
+    font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
     letter-spacing:.35em;font-size:13px;color:var(--aurora);
     margin-bottom:16px;font-weight:500;
   }
   h1.title{
-    font-family:'Gothic A1', sans-serif;font-weight:800;
+    font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;
     font-size:clamp(28px,5.5vw,46px);line-height:1.35;margin:0 0 14px;
   }
   p.lead{font-size:16.5px;color:var(--text-dim);line-height:1.8;margin:0 0 30px;max-width:520px;}
   .launch-btn{
-    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:19px;
+    font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:19px;
     background:var(--starlight);color:#241705;border:none;
     padding:16px 46px;border-radius:999px;cursor:pointer;
     letter-spacing:.05em;transition:transform .15s ease;
@@ -110,7 +110,7 @@
   /* 게임 플레이 화면 우측 상단 게임 종료 버튼 */
   #btn-quit-game{
     position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:15;
-    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:12.5px;
+    font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:12.5px;
     background:rgba(19,26,61,.9);color:var(--flare);
     border:1px solid var(--flare);border-radius:999px;
     padding:9px 16px;cursor:pointer;letter-spacing:.02em;
@@ -140,7 +140,7 @@
     border-radius:14px;padding:13px 18px;
   }
   .rule-num{
-    font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--aurora);
+    font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:700;color:var(--aurora);
     font-size:14px;flex-shrink:0;width:22px;height:22px;border-radius:50%;
     border:1px solid var(--aurora);display:flex;align-items:center;justify-content:center;
   }
@@ -160,8 +160,8 @@
   }
   .hud-block{display:flex;flex-direction:column;align-items:flex-start;}
   .hud-block.right{align-items:flex-end;}
-  .hud-label{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--text-dim);}
-  .hud-value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--text-main);}
+  .hud-label{font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--text-dim);}
+  .hud-value{font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:700;font-size:20px;color:var(--text-main);}
 
   #board-wrap{
     position:relative;
@@ -252,7 +252,7 @@
   }
   .tile .p-name{
     position:relative;z-index:1;
-    font-family:'Gothic A1',sans-serif;font-weight:800;
+    font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;
     color:#fff;
     background:rgba(9,12,31,.6);
     padding:2px 9px;
@@ -290,18 +290,18 @@
   #pad-right{grid-column:3;grid-row:2;}
 
   /* 결과 화면 */
-  .result-title{font-family:'Space Grotesk',sans-serif;font-size:13px;letter-spacing:.3em;color:var(--text-dim);margin-bottom:10px;}
-  #result-tier{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:clamp(22px,4vw,30px);color:var(--starlight);margin:0 0 20px;}
+  .result-title{font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-size:13px;letter-spacing:.3em;color:var(--text-dim);margin-bottom:10px;}
+  #result-tier{font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:clamp(22px,4vw,30px);color:var(--starlight);margin:0 0 20px;}
   #stat-row{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;justify-content:center;}
   .stat-card{background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);border-radius:14px;padding:14px 20px;min-width:96px;}
-  .stat-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--text-main);}
+  .stat-num{font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:700;font-size:22px;color:var(--text-main);}
   .stat-lbl{font-size:11px;color:var(--text-dim);letter-spacing:.1em;margin-top:2px;}
   #fact-card{
     background:var(--panel-navy-2);border:1px solid rgba(79,216,196,.3);
     border-radius:16px;padding:16px 20px;max-width:440px;margin-bottom:22px;text-align:left;
   }
-  #fact-card .fact-label{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;color:var(--aurora);margin-bottom:8px;}
-  #fact-card .fact-name{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;}
+  #fact-card .fact-label{font-family:'Space Grotesk','Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-size:11px;letter-spacing:.2em;color:var(--aurora);margin-bottom:8px;}
+  #fact-card .fact-name{font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:16px;margin-bottom:6px;}
   #fact-card .fact-desc{font-size:13px;color:var(--text-dim);line-height:1.7;}
   .result-btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
 
@@ -323,7 +323,7 @@
   .field-panel .field-label{display:block;font-size:12px;color:var(--text-dim);letter-spacing:.05em;margin-bottom:10px;}
   input.arcade-input{
     width:100%;padding:13px 12px;background:var(--deep-space);border:2px solid rgba(183,192,232,.5);
-    color:var(--text-main);font-family:'Gothic A1',sans-serif;font-weight:700;font-size:16px;  /* 16px 미만이면 iOS가 입력 시 화면을 확대함 */
+    color:var(--text-main);font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:700;font-size:16px;  /* 16px 미만이면 iOS가 입력 시 화면을 확대함 */
     border-radius:8px;outline:none;letter-spacing:.02em;
   }
   input.arcade-input:focus{border-color:var(--aurora);}
@@ -333,7 +333,7 @@
 
   /* 랭킹 보기 버튼: 시작하기 버튼과 완전히 동일한 크기, 색상만 구분 */
   .rank-btn{
-    font-family:'Gothic A1',sans-serif;font-weight:800;font-size:15px;
+    font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:15px;
     background:linear-gradient(135deg, var(--starlight), #ffb454);
     color:#241705;border:none;
     padding:12px 32px;border-radius:999px;cursor:pointer;
@@ -350,7 +350,7 @@
   .field-panel.compact{margin-bottom:6px;}
   .title-note{max-width:440px;font-size:12.5px;line-height:1.7;color:var(--text-dim);margin:14px 0 0;}
   .title-note b{color:var(--starlight);}
-  .credit{font-family:'Gothic A1',sans-serif;font-weight:600;font-size:clamp(10px,1.6vw,12px);color:var(--text-dim);line-height:1.6;margin-top:12px;}
+  .credit{font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:600;font-size:clamp(10px,1.6vw,12px);color:var(--text-dim);line-height:1.6;margin-top:12px;}
   .notice-box{
     display:none;max-width:440px;margin-top:12px;padding:12px 16px;border-radius:12px;
     border:1px solid var(--flare);background:rgba(255,107,129,.1);color:var(--flare);font-weight:700;font-size:14px;line-height:1.6;
@@ -364,7 +364,7 @@
   }
   #closedOverlay.show{display:flex;}
   #closedOverlay .co-icon{font-size:56px;}
-  #closedOverlay .co-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:clamp(22px,5vw,30px);}
+  #closedOverlay .co-title{font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:clamp(22px,5vw,30px);}
   #closedOverlay .co-desc{font-size:15px;line-height:1.7;opacity:.85;max-width:420px;}
 
   /* 내 순위 확인 전용 입력창(모달) */
@@ -378,26 +378,26 @@
     width:100%;max-width:400px;background:var(--panel-navy);
     border:1px solid rgba(183,192,232,.4);border-radius:18px;padding:22px 20px;text-align:left;
   }
-  #lookupModal .modal-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:18px;text-align:center;margin-bottom:6px;}
+  #lookupModal .modal-title{font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:18px;text-align:center;margin-bottom:6px;}
   #lookupModal .modal-desc{font-size:13px;color:var(--text-dim);text-align:center;line-height:1.6;margin-bottom:14px;}
   #lookupModal .field-label{display:block;font-size:12px;color:var(--text-dim);margin:10px 0 6px;}
   #lookupModal .row{margin-top:18px;}
   .closed-claim-note{background:rgba(183,192,232,.1);border:1px solid rgba(183,192,232,.35);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--text-dim);}
 
   .rank-card{width:100%;max-width:440px;background:var(--panel-navy);border:1px solid rgba(183,192,232,.35);border-radius:16px;padding:16px 18px;margin-bottom:14px;text-align:left;}
-  .rank-title{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:15px;text-align:center;margin-bottom:12px;}
-  .my-rank{background:rgba(79,216,196,.1);border:1px solid rgba(79,216,196,.4);border-radius:12px;padding:12px;text-align:center;font-family:'Gothic A1',sans-serif;font-weight:800;color:var(--aurora);font-size:15px;margin-bottom:10px;}
+  .rank-title{font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:15px;text-align:center;margin-bottom:12px;}
+  .my-rank{background:rgba(79,216,196,.1);border:1px solid rgba(79,216,196,.4);border-radius:12px;padding:12px;text-align:center;font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;color:var(--aurora);font-size:15px;margin-bottom:10px;}
   .my-rank small{display:block;margin-top:4px;font-weight:600;font-size:12px;color:var(--text-dim);}
   .leader-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(183,192,232,.2);font-weight:700;font-size:14px;}
   .leader-row:last-child{border-bottom:none;}
   .leader-meta{font-size:12px;font-weight:600;color:var(--text-dim);text-align:right;line-height:1.5;}
   .medal{font-size:18px;margin-right:6px;}
   .loading{text-align:center;color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:10px;}
-  .mini-btn{margin-top:12px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--aurora);background:transparent;color:var(--aurora);font-family:'Gothic A1',sans-serif;font-weight:800;font-size:13px;cursor:pointer;}
+  .mini-btn{margin-top:12px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--aurora);background:transparent;color:var(--aurora);font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:13px;cursor:pointer;}
   .mini-btn:active{background:rgba(79,216,196,.15);}
 
   .prize{width:100%;max-width:440px;margin-bottom:14px;border-radius:16px;padding:16px 18px;background:var(--panel-navy-2);border:1px solid rgba(245,200,107,.45);text-align:left;font-size:13.5px;line-height:1.65;}
-  .prize h3{margin:0 0 8px;font-family:'Gothic A1',sans-serif;font-weight:800;font-size:16px;color:var(--starlight);}
+  .prize h3{margin:0 0 8px;font-family:'Gothic A1','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;font-weight:800;font-size:16px;color:var(--starlight);}
   .prize p{margin:8px 0;}
   .prize .warn{background:rgba(245,200,107,.12);border:1px solid rgba(245,200,107,.4);border-radius:10px;padding:10px 12px;font-size:12.5px;}
   .prize .ok{background:rgba(107,230,166,.12);border:1px solid rgba(107,230,166,.45);border-radius:10px;padding:10px 12px;}
