@@ -483,6 +483,25 @@
     .field-panel,.rank-card,.prize,#fact-card{max-width:520px;}
     .pad-btn{font-size:34px;}
   }
+
+  /* ===== 시작 화면 버튼 영역: 큰 주 버튼 1개 + 보조 버튼 2개(가로 배치) ===== */
+  .title-actions{width:100%;max-width:440px;display:flex;flex-direction:column;gap:12px;margin-top:12px;}
+  .title-actions .btn-start{
+    width:100%;margin:0;padding:clamp(14px,2.4dvh,18px) 20px;
+    font-size:clamp(18px,4.8vw,21px);letter-spacing:.04em;border-radius:999px;
+    background:linear-gradient(135deg,#4FD8C4,#5b8dff);color:#04121f;
+    box-shadow:0 8px 22px rgba(79,216,196,.28);
+  }
+  .title-actions .sub-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .title-actions .sub-actions .rank-btn,
+  .title-actions .sub-actions .hub-btn{
+    margin:0;width:100%;min-height:48px;padding:10px 8px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:clamp(13px,3.6vw,15px);font-weight:700;letter-spacing:0;line-height:1.25;white-space:nowrap;
+  }
+  .title-actions .sub-actions .rank-btn{background:rgba(245,200,107,.10);border:1.5px solid rgba(245,200,107,.65);color:var(--starlight);}
+  .title-actions .sub-actions .rank-btn:active{background:rgba(245,200,107,.22);}
+  .title-actions .sub-actions .hub-btn{background:transparent;border:1.5px solid rgba(183,192,232,.55);color:var(--text-dim);}
 </style>
 </head>
 <body>
@@ -507,11 +526,15 @@
             </div>
           </div>
         </div>
-        <button class="launch-btn" id="btn-to-howto" style="margin-top:10px;">시작하기</button>
         <div class="notice-box" id="closedNotice">🏁 운영이 종료되었어요.<br>참여해 주셔서 감사합니다. 아래에서 최종 순위를 확인할 수 있어요.</div>
         <div class="notice-box" id="blockNotice">😊 이미 참여하셨습니다!<br>참여해 주셔서 감사합니다.</div>
-        <button class="rank-btn" id="btn-to-ranking">🏆 내 순위 다시 확인하기</button>
-        <a class="ghost-btn hub-btn" id="hub-title" href="https://dsvit100.github.io/game_hub/">🏠 허브로 돌아가기</a>
+        <div class="title-actions">
+          <button class="launch-btn btn-start" id="btn-to-howto">시작하기</button>
+          <div class="sub-actions">
+            <button class="rank-btn" id="btn-to-ranking">🏆 내 순위 확인</button>
+            <a class="ghost-btn hub-btn" id="hub-title" href="https://dsvit100.github.io/game_hub/">🏠 허브로</a>
+          </div>
+        </div>
         <p class="title-note" id="titleNote"></p>
         <div class="credit">
           © 부천천문과학관. All rights reserved.
@@ -1018,15 +1041,18 @@ function claimForm(){
     · 동의를 거부할 수 있으며, 거부 시 상품 발송이 어렵습니다.<br>· 상품은 국내 배송만 가능합니다.<br>· 주소나 연락처가 정확하지 않은 경우 배송이 불가합니다.<br>· 잘못된 정보로 인한 미발송 또는 오발송에 대해서는 책임지기 어려우니, 제출 전 한 번 더 확인 부탁드립니다.</details>
   <label class="chk"><input type="checkbox" id="cConsent"> [필수] 위 개인정보 수집·이용에 동의합니다.</label>
   <label class="chk"><input type="checkbox" id="cAge"> [필수] 만 14세 이상이거나, 만 14세 미만인 경우 법정대리인의 동의를 받았습니다.</label>
-  <button class="launch-btn" onclick="sendClaim()">📦 배송 정보 제출</button></div>`;
+  <button class="launch-btn" id="btnClaim" onclick="sendClaim()">📦 배송 정보 제출</button></div>`;
 }
 
+let claiming = false;
 function sendClaim(){
+  if(claiming) return;
   if(serverClosed || prizeClosed) return alert('운영이 종료되어 배송 정보를 제출·수정할 수 없어요.');
   const g = id => $(id).value.trim(), tel = g('cTel').replace(/-/g,'');
   if(!g('cName') || g('cAddr').length < 8) return alert('받는 분 이름과 주소(동·호수까지)를 자세히 입력해 주세요.');
   if(!/^01\d{8,9}$/.test(tel)) return alert('연락처를 010, 011로 시작되는 휴대폰 번호 형식으로 입력해 주세요.');
   if(!$('cConsent').checked || !$('cAge').checked) return alert('필수 동의 항목에 체크해 주세요.');
+  claiming = true; const btn = $('btnClaim'); if(btn){ btn.disabled = true; btn.textContent = '제출 중...'; }   // 중복 제출 방지
   POST({ action:'claim', name:me.name, phone:me.phone, receiver:g('cName'), tel, addr:g('cAddr'), consent:true, age:true })
    .then(r => {
      if(r && r.closed){ applyClosed(); return; }
@@ -1035,7 +1061,8 @@ function sendClaim(){
      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
      prizeKey = ''; refresh(true);
    })
-   .catch(() => alert('네트워크 오류가 발생했어요. 다시 시도해 주세요.'));
+   .catch(() => alert('네트워크 오류가 발생했어요. 다시 시도해 주세요.'))
+   .finally(() => { claiming = false; const b = $('btnClaim'); if(b){ b.disabled = false; b.textContent = '📦 배송 정보 제출'; } });
 }
 
 function buildChainPreview(){
